@@ -9,7 +9,7 @@ class SimulateRequest(BaseModel):
     dur: int = Field(..., ge=6, le=24, description="Длительность проекта (итераций)")
     team: int = Field(..., ge=3, le=12)
     sig: float = Field(..., ge=0.1, le=0.7, description="σ неопределённости")
-    spd: float = Field(..., ge=7, le=21, description="Длина спринта, дней")
+    spd: float = Field(..., ge=7, le=31, description="Длина спринта, дней")
     vel: float = Field(..., ge=20, le=80, description="Базовая velocity (story points)")
     ovh: float = Field(..., ge=0.05, le=0.35, description="Накладные расходы церемоний, доля")
     wip: int = Field(..., ge=1, le=10)
