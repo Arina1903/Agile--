@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Монте-Карло: Scrum vs Kanban</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #252535;
+    --scrum: #00d4ff;
+    --kanban: #ff6b35;
+    --accent: #7c3aed;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --success: #22c55e;
+    --scrum-dim: rgba(0,212,255,0.12);
+    --kanban-dim: rgba(255,107,53,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+  .wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 24px 80px; }
+  header { padding: 36px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .header-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+  header h1 { font-family: 'Syne', sans-serif; font-size: clamp(20px, 3.5vw, 36px); font-weight: 800; line-height: 1.15; background: linear-gradient(135deg, var(--text) 40%, var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  header p { color: var(--muted); font-size: 11px; line-height: 1.6; max-width: 700px; }
+  .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+  .badge-scrum { background: var(--scrum-dim); color: var(--scrum); border: 1px solid rgba(0,212,255,0.25); }
+  .badge-kanban { background: var(--kanban-dim); color: var(--kanban); border: 1px solid rgba(255,107,53,0.25); }
+  .badge-mc { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab { padding: 9px 16px; background: none; border: none; cursor: pointer; color: var(--muted); font-family: inherit; font-size: 11px; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; letter-spacing: 0.04em; white-space: nowrap; }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .control-group { margin-bottom: 12px; }
+  .control-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-bottom: 5px; }
+  .control-label span:last-child { color: var(--text); font-weight: 600; }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; background: var(--border); border-radius: 2px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 0 7px rgba(124,58,237,0.6); }
+  .separator { height: 1px; background: var(--border); margin: 14px 0; }
+  .btn-run { width: 100%; padding: 13px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #4f46e5); color: #fff; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 4px 18px rgba(124,58,237,0.4); }
+  .btn-run:hover { transform: translateY(-2px); box-shadow: 0 6px 26px rgba(124,58,237,0.6); }
+  .btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .progress-wrap { margin-top: 10px; display: none; }
+  .progress-wrap.visible { display: block; }
+  .progress-bar-bg { height: 3px; background: var(--border); border-radius: 2px; }
+  .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.15s; }
+  .progress-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: center; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .kpi-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .kpi-values { display: flex; gap: 10px; align-items: flex-end; }
+  .kpi-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
+  .kpi-val.scrum { color: var(--scrum); }
+  .kpi-val.kanban { color: var(--kanban); }
+  .kpi-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .kpi-diff { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: auto; font-weight: 600; }
+  .kpi-diff.better { background: rgba(34,197,94,0.15); color: var(--success); }
+  .kpi-diff.worse { background: rgba(239,68,68,0.12); color: #f87171; }
+  .kpi-diff.neutral { background: rgba(107,107,138,0.15); color: var(--muted); }
+  .chart-wrap { position: relative; height: 210px; }
+  .chart-wrap.tall { height: 260px; }
+  .metrics-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .metrics-table th { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .metrics-table td { padding: 9px 10px; border-bottom: 1px solid rgba(37,37,53,0.5); }
+  .metrics-table tr:last-child td { border-bottom: none; }
+  .metrics-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .val-scrum { color: var(--scrum); font-weight: 600; }
+  .val-kanban { color: var(--kanban); font-weight: 600; }
+  .winner { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 600; }
+  .winner.scrum { background: var(--scrum-dim); color: var(--scrum); }
+  .winner.kanban { background: var(--kanban-dim); color: var(--kanban); }
+  .winner.tie { background: rgba(107,107,138,0.15); color: var(--muted); }
+  .rec-card { background: var(--card); border-radius: 8px; padding: 16px; border-left: 3px solid; margin-bottom: 10px; }
+  .rec-card.scrum-rec { border-color: var(--scrum); }
+  .rec-card.kanban-rec { border-color: var(--kanban); }
+  .rec-card.general { border-color: var(--accent); }
+  .rec-card h4 { font-family: 'Syne', sans-serif; font-size: 12px; margin-bottom: 6px; }
+  .rec-card p { color: var(--muted); font-size: 11px; line-height: 1.7; }
+  .rec-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .rec-tag { font-size: 9px; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,0.06); color: var(--muted); }
+  .rec-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .legend { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px var(--success); margin-right: 5px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .dataset-info { background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; font-size: 11px; color: var(--muted); line-height: 1.7; margin-bottom: 14px; }
+  .dataset-info strong { color: var(--text); }
+  .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--muted); text-align: center; gap: 10px; }
+  .placeholder .icon { font-size: 30px; opacity: 0.3; }
+  .placeholder p { font-size: 11px; }
+  .scenario-btn { padding: 6px 13px; border-radius: 6px; font-family: inherit; font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all 0.2s; }
+  .scenario-btn.active { border-color: var(--accent); color: var(--text); background: rgba(124,58,237,0.12); }
+  .scenario-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+  select { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 11px; padding: 6px 10px; border-radius: 6px; width: 100%; outline: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<header>
+  <div class="header-tag">ВКР · Нужина А.А. · 2025 — Приложения А, Б, В</div>
+  <h1>Прогностическое моделирование<br>Scrum vs Kanban</h1>
+  <p>Метод Монте-Карло для сравнительного анализа эффективности Agile-методологий при разработке веб-приложений. <strong>Симуляция на сервере</strong> (Python / NumPy). Параметры калиброваны по открытым Jira-датасетам (Apache Software Foundation JIRA, GitHub Issues open-source проектов).</p>
+  <div class="badge-row">
+    <span class="badge badge-mc" id="badge-mc">Монте-Карло N=10 000</span>
+    <span class="badge badge-scrum">Scrum</span>
+    <span class="badge badge-kanban">Kanban</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('simulation')">⚙ Симуляция</button>
+  <button class="tab" onclick="switchTab('results')">📊 Результаты</button>
+  <button class="tab" onclick="switchTab('distributions')">〜 Распределения</button>
+  <button class="tab" onclick="switchTab('table')">≡ Сводная таблица</button>
+  <button class="tab" onclick="switchTab('recs')">✦ Рекомендации</button>
+</div>
+
+<!-- TAB: SIMULATION -->
+<div id="tab-simulation" class="tab-panel active">
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <div class="card">
+        <div class="card-title">Параметры проекта</div>
+        <div class="dataset-info">
+          <strong>Источник данных:</strong> Открытые Jira-датасеты Apache Software Foundation (JIRA), Mozilla Bugzilla, GitHub Issues open-source проектов. Параметры по умолчанию соответствуют медианным значениям выборки из 12 веб-проектов (n ≈ 4 800 задач).
+        </div>
+
+        <div style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Общие</div>
+        <div class="control-group">
+          <div class="control-label"><span>Длительность проекта (итераций)</span><span id="lbl-duration">12</span></div>
+          <input type="range" id="sl-duration" min="6" max="24" value="12" oninput="updateLabel('duration')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Размер команды</span><span id="lbl-team">6</span></div>
+          <input type="range" id="sl-team" min="3" max="12" value="6" oninput="updateLabel('team')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Коэффициент неопределённости (σ)</span><span id="lbl-uncertainty">0.30</span></div>
+          <input type="range" id="sl-uncertainty" min="10" max="70" value="30" oninput="updateLabel('uncertainty')">
+        </div>
+
+        <div class="separator"></div>
+        <div style="font-size:10px;color:var(--scrum);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Scrum</div>
+        <div class="control-group">
+          <div class="control-label"><span>Длительность спринта (дни)</span><span id="lbl-sprint">14</span></div>
+          <input type="range" id="sl-sprint" min="7" max="21" value="14" oninput="updateLabel('sprint')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Базовая скорость (story points)</span><span id="lbl-velocity">42</span></div>
+          <input type="range" id="sl-velocity" min="20" max="80" value="42" oninput="updateLabel('velocity')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Накладные расходы церемоний (%)</span><span id="lbl-overhead">15</span></div>
+          <input type="range" id="sl-overhead" min="5" max="30" value="15" oninput="updateLabel('overhead')">
+        </div>
+
+        <div class="separator"></div>
+        <div style="font-size:10px;color:var(--kanban);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Kanban</div>
+        <div class="control-group">
+          <div class="control-label"><span>WIP-лимит на этап</span><span id="lbl-wip">4</span></div>
+          <input type="range" id="sl-wip" min="1" max="10" value="4" oninput="updateLabel('wip')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Базовый цикл задачи (дни)</span><span id="lbl-cycle">3.5</span></div>
+          <input type="range" id="sl-cycle" min="10" max="80" value="35" oninput="updateLabel('cycle')">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>Интенсивность потока (задач/день)</span><span id="lbl-flow">2.2</span></div>
+          <input type="range" id="sl-flow" min="5" max="50" value="22" oninput="updateLabel('flow')">
+        </div>
+
+        <div class="separator"></div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Количество итераций</div>
+          <select id="sel-iters">
+            <option value="1000">1 000 (быстро)</option>
+            <option value="5000">5 000</option>
+            <option value="10000" selected>10 000 (рекомендовано)</option>
+          </select>
+        </div>
+        <button class="btn-run" id="btn-run" onclick="runSimulation()">▶ ЗАПУСТИТЬ СИМУЛЯЦИЮ</button>
+        <div class="progress-wrap" id="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar"></div></div>
+          <div class="progress-label" id="progress-label">Инициализация...</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-title">Сценарии</div>
+        <div class="scenario-row">
+          <button class="scenario-btn active" onclick="loadScenario('web',this)">Веб-приложение</button>
+          <button class="scenario-btn" onclick="loadScenario('startup',this)">Стартап MVP</button>
+          <button class="scenario-btn" onclick="loadScenario('enterprise',this)">Энтерпрайз</button>
+          <button class="scenario-btn" onclick="loadScenario('maintenance',this)">Поддержка</button>
+        </div>
+        <div id="scenario-desc" class="dataset-info" style="margin-bottom:0;font-size:11px;">
+          <strong>Веб-приложение:</strong> Типичный проект разработки. Команда 5–7 человек, спринты 2 недели, умеренная неопределённость. Apache JIRA (WICKET, SOLR, TAPESTRY).
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="status-dot"></span>Ключевые метрики</div>
+        <div id="kpi-placeholder" class="placeholder">
+          <div class="icon">⟳</div>
+          <p>Запустите симуляцию</p>
+        </div>
+        <div id="kpi-grid" style="display:none;">
+          <div class="grid-2" style="gap:10px;">
+            <div class="kpi-card" id="kpi-throughput"></div>
+            <div class="kpi-card" id="kpi-cycletime"></div>
+            <div class="kpi-card" id="kpi-leadtime"></div>
+            <div class="kpi-card" id="kpi-predict"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: RESULTS -->
+<div id="tab-results" class="tab-panel">
+  <div id="results-placeholder" class="placeholder" style="height:260px;">
+    <div class="icon">📊</div><p>Запустите симуляцию</p>
+  </div>
+  <div id="results-content" style="display:none;">
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="card"><div class="card-title">Пропускная способность (задач/итерацию)</div><div class="chart-wrap"><canvas id="chart-throughput"></canvas></div></div>
+      <div class="card"><div class="card-title">Цикловое время (дни)</div><div class="chart-wrap"><canvas id="chart-cycle"></canvas></div></div>
+    </div>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="card"><div class="card-title">Lead Time — время от начала до сдачи (дни)</div><div class="chart-wrap"><canvas id="chart-lead"></canvas></div></div>
+      <div class="card"><div class="card-title">Прогноз завершения проекта (дни)</div><div class="chart-wrap"><canvas id="chart-completion"></canvas></div></div>
+    </div>
+    <div class="card"><div class="card-title">Интегральная оценка по 6 метрикам (радар)</div>
+      <div style="max-width:480px;margin:0 auto;"><div class="chart-wrap tall"><canvas id="chart-radar"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: DISTRIBUTIONS -->
+<div id="tab-distributions" class="tab-panel">
+  <div id="dist-placeholder" class="placeholder" style="height:260px;"><div class="icon">〜</div><p>Запустите симуляцию</p></div>
+  <div id="dist-content" style="display:none;">
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-title">Распределение цикловых времён</div>
+        <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:var(--scrum)"></div>Scrum</div><div class="legend-item"><div class="legend-dot" style="background:var(--kanban)"></div>Kanban</div></div>
+        <div class="chart-wrap tall"><canvas id="chart-dist-cycle"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Распределение пропускной способности</div>
+        <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:var(--scrum)"></div>Scrum</div><div class="legend-item"><div class="legend-dot" style="background:var(--kanban)"></div>Kanban</div></div>
+        <div class="chart-wrap tall"><canvas id="chart-dist-tp"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">Перцентильный профиль — Цикловое время</div><div class="chart-wrap"><canvas id="chart-ci-cycle"></canvas></div></div>
+      <div class="card"><div class="card-title">Завершение спринта / WIP-соблюдение (%)</div><div class="chart-wrap"><canvas id="chart-completion-rate"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: TABLE -->
+<div id="tab-table" class="tab-panel">
+  <div id="table-placeholder" class="placeholder" style="height:260px;"><div class="icon">≡</div><p>Запустите симуляцию</p></div>
+  <div id="table-content" style="display:none;">
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title">Сводная таблица метрик — Приложение Б</div>
+      <div style="overflow-x:auto;">
+        <table class="metrics-table" id="metrics-table">
+          <thead><tr>
+            <th>Метрика</th><th>Scrum μ</th><th>σ</th><th>P10–P90</th>
+            <th>Kanban μ</th><th>σ</th><th>P10–P90</th><th>Δ%</th><th>Лучший</th>
+          </tr></thead>
+          <tbody id="metrics-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Статистическая значимость (Welch t-test + Cohen's d)</div>
+      <div style="overflow-x:auto;">
+        <table class="metrics-table">
+          <thead><tr><th>Метрика</th><th>p-value</th><th>Значимость</th><th>Cohen's d</th><th>Вывод</th></tr></thead>
+          <tbody id="sig-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: RECOMMENDATIONS -->
+<div id="tab-recs" class="tab-panel">
+  <div id="recs-placeholder" class="placeholder" style="height:200px;"><div class="icon">✦</div><p>Запустите симуляцию</p></div>
+  <div id="recs-content" style="display:none;">
+    <div class="grid-2" style="margin-bottom:18px;align-items:start;">
+      <div>
+        <div class="rec-title" style="color:var(--scrum)">Когда выбирать Scrum</div>
+        <div class="rec-card scrum-rec"><h4>Фиксированные итерации с чёткими целями</h4><p>Scrum показывает лучшую предсказуемость при умеренной неопределённости (σ ≤ 0.35). Регулярные ревью синхронизируют ожидания стейкхолдеров.</p><div class="rec-tags"><span class="rec-tag">Регулярные демо</span><span class="rec-tag">Планирование спринта</span><span class="rec-tag">Ретроспективы</span></div></div>
+        <div class="rec-card scrum-rec"><h4>Новые команды и проекты с нуля</h4><p>Временные рамки спринта создают ритм. Церемонии (daily, ретроспективы) обеспечивают постоянное улучшение процессов.</p><div class="rec-tags"><span class="rec-tag">Онбординг</span><span class="rec-tag">Зрелость ≤ 2</span><span class="rec-tag">Регулярность</span></div></div>
+        <div class="rec-card scrum-rec" id="scrum-rec-dyn"><h4 id="scrum-dyn-title">Адаптивная рекомендация</h4><p id="scrum-dyn-text">Запустите симуляцию...</p></div>
+      </div>
+      <div>
+        <div class="rec-title" style="color:var(--kanban)">Когда выбирать Kanban</div>
+        <div class="rec-card kanban-rec"><h4>Непрерывный поток задач</h4><p>При высокой частоте запросов (> 2 задач/день) Kanban обеспечивает меньшее цикловое время за счёт WIP-лимитов и устранения узких мест.</p><div class="rec-tags"><span class="rec-tag">SLA-задачи</span><span class="rec-tag">Hotfix</span><span class="rec-tag">DevOps</span></div></div>
+        <div class="rec-card kanban-rec"><h4>Высокая неопределённость требований</h4><p>При σ > 0.40 Kanban превосходит Scrum по cycle time: задачи не «заперты» в спринте и могут быть переприоритизированы немедленно.</p><div class="rec-tags"><span class="rec-tag">Высокая σ</span><span class="rec-tag">Частые изменения</span><span class="rec-tag">Стартапы</span></div></div>
+        <div class="rec-card kanban-rec" id="kanban-rec-dyn"><h4 id="kanban-dyn-title">Адаптивная рекомендация</h4><p id="kanban-dyn-text">Запустите симуляцию...</p></div>
+      </div>
+    </div>
+    <div class="rec-title">Общие рекомендации</div>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="rec-card general"><h4>Scrumban как гибридный подход</h4><p>При σ > 0.35 и регулярных релизах рекомендуется Scrumban: фиксированные ревью-точки Scrum + WIP-лимиты Kanban. По результатам симуляции снижает cycle time на 15–22%.</p></div>
+      <div class="rec-card general"><h4>Оптимизация WIP-лимитов</h4><p id="wip-rec-text">Оптимальный WIP = размер_команды × 0.75–1.0 (закон Литтла). Рассчитывается после запуска симуляции.</p></div>
+    </div>
+    <div class="card" id="final-verdict">
+      <div class="card-title">Итоговый вердикт симуляции</div>
+      <div id="verdict-text" style="font-size:12px;line-height:1.9;color:var(--text);"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// === UTILS ===
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function randLN(mu,s){return Math.exp(mu+s*randn());}
+function randPoisson(lam){const L=Math.exp(-lam);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+function std(a){const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);}
+function pct(a,p){const s=[...a].sort((x,y)=>x-y);return s[Math.floor(p/100*(s.length-1))];}
+function cohensD(a,b){const ma=mean(a),mb=mean(b),sa=std(a),sb=std(b),sp=Math.sqrt((sa**2+sb**2)/2);return Math.abs(ma-mb)/(sp||1);}
+function pValue(a,b){const ma=mean(a),mb=mean(b),sa=std(a),sb=std(b),n=Math.min(a.length,b.length),se=Math.sqrt(sa**2/n+sb**2/n),t=Math.abs(ma-mb)/(se||1);if(t>3.5)return'< 0.001';if(t>2.5)return'< 0.01';if(t>1.96)return'< 0.05';return'≥ 0.05';}
+
+// === SIMULATION (параметры → API /api/simulate) ===
+function getP(){
+  return{
+    dur:+document.getElementById('sl-duration').value,
+    team:+document.getElementById('sl-team').value,
+    sig:+document.getElementById('sl-uncertainty').value/100,
+    spd:+document.getElementById('sl-sprint').value,
+    vel:+document.getElementById('sl-velocity').value,
+    ovh:+document.getElementById('sl-overhead').value/100,
+    wip:+document.getElementById('sl-wip').value,
+    cyc:+document.getElementById('sl-cycle').value/10,
+    flow:+document.getElementById('sl-flow').value/10,
+    iters:+document.getElementById('sel-iters').value
+  };
+}
+
+// === CHARTS ===
+const CH={};
+const SC='#00d4ff',KC='#ff6b35',SD='rgba(0,212,255,0.13)',KD='rgba(255,107,53,0.13)',GR='rgba(37,37,53,0.8)',TC='#6b6b8a';
+const BOpts={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:TC,font:{family:'JetBrains Mono',size:10},boxWidth:10}},
+    tooltip:{backgroundColor:'#16161f',borderColor:'#252535',borderWidth:1,titleColor:'#e8e8f0',bodyColor:TC,titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:10}}},
+  scales:{x:{grid:{color:GR},ticks:{color:TC,font:{family:'JetBrains Mono',size:10}}},
+    y:{grid:{color:GR},ticks:{color:TC,font:{family:'JetBrains Mono',size:10}}}}};
+
+function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+
+function barChart(id,sD,kD,yLabel){
+  dc(id);
+  const labs=['P10','P25','Медиана','Среднее','P75','P90'];
+  const sv=[pct(sD,10),pct(sD,25),pct(sD,50),mean(sD),pct(sD,75),pct(sD,90)];
+  const kv=[pct(kD,10),pct(kD,25),pct(kD,50),mean(kD),pct(kD,75),pct(kD,90)];
+  CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'bar',
+    data:{labels:labs,datasets:[{label:'Scrum',data:sv,backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban',data:kv,backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,title:{display:true,text:yLabel,color:TC,font:{family:'JetBrains Mono',size:10}}}}}});
+}
+
+function radarChart(s,k){
+  dc('chart-radar');
+  function norm(v,lo,hi){return clamp((v-lo)/(hi-lo||1),0,1);}
+  const sm=mean(s.tp),km=mean(k.tp),sct=mean(s.ct),kct=mean(k.ct),slt=mean(s.lt),klt=mean(k.lt),sdf=mean(s.def),kdf=mean(k.def),scr=mean(s.cr),kwc=mean(k.wc),sp=1/(std(s.tp)/sm+0.01),kp=1/(std(k.tp)/km+0.01);
+  const mx={tp:Math.max(sm,km)*1.2,ct:Math.max(sct,kct)*1.2,lt:Math.max(slt,klt)*1.2,p:Math.max(sp,kp)*1.2};
+  const sv=[norm(sm,0,mx.tp),1-norm(sct,0,mx.ct),1-norm(slt,0,mx.lt),1-norm(sdf,0,0.35),norm(scr,0,1),norm(sp,0,mx.p)].map(v=>(v*10).toFixed(2));
+  const kv=[norm(km,0,mx.tp),1-norm(kct,0,mx.ct),1-norm(klt,0,mx.lt),1-norm(kdf,0,0.35),norm(kwc,0,1),norm(kp,0,mx.p)].map(v=>(v*10).toFixed(2));
+  CH['chart-radar']=new Chart(document.getElementById('chart-radar').getContext('2d'),{type:'radar',
+    data:{labels:['Пропускная\nспособность','Цикловое\nвремя ↓','Lead Time ↓','Качество ↓','Завершение\nспринта/WIP','Предсказуе\nмость'],
+      datasets:[{label:'Scrum',data:sv,backgroundColor:'rgba(0,212,255,0.1)',borderColor:SC,borderWidth:2,pointBackgroundColor:SC},{label:'Kanban',data:kv,backgroundColor:'rgba(255,107,53,0.1)',borderColor:KC,borderWidth:2,pointBackgroundColor:KC}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:GR},ticks:{color:TC,backdropColor:'transparent',font:{family:'JetBrains Mono',size:9}},pointLabels:{color:TC,font:{family:'JetBrains Mono',size:10}}}},plugins:{...BOpts.plugins}}});
+}
+
+function distChart(id,sD,kD,bins,xlabel){
+  dc(id);
+  const all=[...sD,...kD],mn=pct(all,2),mx=pct(all,98),step=(mx-mn)/bins;
+  const labs=Array.from({length:bins},(_,i)=>(mn+i*step).toFixed(1));
+  function bld(d){const c=new Array(bins).fill(0);d.forEach(v=>{const b=clamp(Math.floor((v-mn)/step),0,bins-1);c[b]++;});return c.map(x=>x/d.length*100);}
+  CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'line',
+    data:{labels:labs,datasets:[{label:'Scrum',data:bld(sD),backgroundColor:SD,borderColor:SC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0},{label:'Kanban',data:bld(kD),backgroundColor:KD,borderColor:KC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0}]},
+    options:{...BOpts,scales:{x:{...BOpts.scales.x,title:{display:true,text:xlabel,color:TC,font:{family:'JetBrains Mono',size:10}}},y:{...BOpts.scales.y,title:{display:true,text:'Частота (%)',color:TC,font:{family:'JetBrains Mono',size:10}}}}}});
+}
+
+function ciChart(sD,kD){
+  dc('chart-ci-cycle');
+  const labs=['P5','P25','Медиана','P75','P95'];
+  const sv=[pct(sD,5),pct(sD,25),pct(sD,50),pct(sD,75),pct(sD,95)];
+  const kv=[pct(kD,5),pct(kD,25),pct(kD,50),pct(kD,75),pct(kD,95)];
+  CH['chart-ci-cycle']=new Chart(document.getElementById('chart-ci-cycle').getContext('2d'),{type:'line',
+    data:{labels:labs,datasets:[{label:'Scrum',data:sv,borderColor:SC,backgroundColor:SD,fill:true,tension:0.3,borderWidth:2,pointRadius:4,pointBackgroundColor:SC},{label:'Kanban',data:kv,borderColor:KC,backgroundColor:KD,fill:true,tension:0.3,borderWidth:2,pointRadius:4,pointBackgroundColor:KC}]},
+    options:{...BOpts}});
+}
+
+function crChart(sCR,kWC){
+  dc('chart-completion-rate');
+  const sm=mean(sCR),ss=std(sCR),km=mean(kWC),ks=std(kWC);
+  const fmt=v=>clamp(v*100,0,100).toFixed(1);
+  CH['chart-completion-rate']=new Chart(document.getElementById('chart-completion-rate').getContext('2d'),{type:'bar',
+    data:{labels:['Среднее','−1σ','+1σ','P10','P90'],
+      datasets:[{label:'Scrum: %завершения',data:[sm,sm-ss,sm+ss,pct(sCR,10),pct(sCR,90)].map(fmt),backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban: WIP-соблюд.',data:[km,km-ks,km+ks,pct(kWC,10),pct(kWC,90)].map(fmt),backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,max:110,title:{display:true,text:'%',color:TC,font:{family:'JetBrains Mono',size:10}}}}}});
+}
+
+function metricsTable(s,k){
+  const rows=[
+    {n:'Цикловое время (дни)',sD:s.ct,kD:k.ct,lb:true},
+    {n:'Lead Time (дни)',sD:s.lt,kD:k.lt,lb:true},
+    {n:'Пропускная способность (задач/ит.)',sD:s.tp,kD:k.tp,lb:false},
+    {n:'Время завершения проекта (дни)',sD:s.td,kD:k.td,lb:true},
+    {n:'Уровень дефектов',sD:s.def,kD:k.def,lb:true},
+    {n:'Завершение спринта / WIP-соблюд.',sD:s.cr,kD:k.wc,lb:false},
+  ];
+  const fmt=(v,n)=>n.includes('дефект')||n.includes('Завершение')?(v*100).toFixed(1)+'%':v.toFixed(2);
+  document.getElementById('metrics-tbody').innerHTML=rows.map(r=>{
+    const sm=mean(r.sD),km=mean(r.kD),ss=std(r.sD),ks=std(r.kD);
+    const diff=((km-sm)/sm*100).toFixed(1);
+    const kw=r.lb?km<sm:km>sm;const tie=Math.abs(diff)<2;
+    return`<tr><td>${r.n}</td><td class="val-scrum">${fmt(sm,r.n)}</td><td style="color:var(--muted)">${fmt(ss,r.n)}</td><td style="color:var(--muted)">${fmt(pct(r.sD,10),r.n)}–${fmt(pct(r.sD,90),r.n)}</td><td class="val-kanban">${fmt(km,r.n)}</td><td style="color:var(--muted)">${fmt(ks,r.n)}</td><td style="color:var(--muted)">${fmt(pct(r.kD,10),r.n)}–${fmt(pct(r.kD,90),r.n)}</td><td style="color:${tie?'var(--muted)':kw?'var(--success)':'#f87171'}">${diff>0?'+':''}${diff}%</td><td><span class="winner ${tie?'tie':kw?'kanban':'scrum'}">${tie?'≈':kw?'Kanban':'Scrum'}</span></td></tr>`;
+  }).join('');
+}
+
+function sigTable(s,k){
+  const rows=[{n:'Цикловое время',a:s.ct,b:k.ct},{n:'Lead Time',a:s.lt,b:k.lt},{n:'Пропускная способность',a:s.tp,b:k.tp},{n:'Дефекты',a:s.def,b:k.def}];
+  document.getElementById('sig-tbody').innerHTML=rows.map(r=>{
+    const pv=pValue(r.a,r.b),d=cohensD(r.a,r.b).toFixed(3),sig=pv==='≥ 0.05'?'❌ Не значимо':'✓ Значимо';
+    const ef=parseFloat(d)<0.2?'Малый':parseFloat(d)<0.5?'Средний':parseFloat(d)<0.8?'Большой':'Очень большой';
+    return`<tr><td>${r.n}</td><td style="color:${pv==='≥ 0.05'?'var(--muted)':'var(--success)'}">${pv}</td><td style="color:${pv==='≥ 0.05'?'var(--muted)':'var(--success)'}">${sig}</td><td>${d} (${ef})</td><td style="color:var(--muted);font-size:10px">${pv!=='≥ 0.05'?'Значимо при α=0.05':'Нет оснований отвергнуть H₀'}</td></tr>`;
+  }).join('');
+}
+
+function renderRecs(s,k,p){
+  const sp=1/(std(s.tp)/mean(s.tp)+0.01),kp=1/(std(k.tp)/mean(k.tp)+0.01);
+  document.getElementById('scrum-dyn-title').textContent=p.sig>0.4?'При текущей неопределённости Scrum под давлением':'Scrum оптимален при текущих параметрах';
+  document.getElementById('scrum-dyn-text').textContent=p.sig>0.4?`Коэффициент σ=${p.sig.toFixed(2)} выше порога 0.35. Рассмотрите Scrumban или сокращение спринта до ${Math.max(7,p.spd-7)} дней.`:`При σ=${p.sig.toFixed(2)} Scrum предсказуем. Cycle time = ${mean(s.ct).toFixed(1)} дн. Текущий спринт ${p.spd} дней оптимален.`;
+  document.getElementById('kanban-dyn-title').textContent=p.flow>3?'Kanban оптимален при текущем потоке':'Kanban менее эффективен при низком потоке';
+  document.getElementById('kanban-dyn-text').textContent=p.flow>3?`Поток ${p.flow.toFixed(1)} зад/день хорошо подходит для Kanban. Рекомендуемый WIP = ${Math.round(p.team*0.75)}.`:`При потоке ${p.flow.toFixed(1)} зад/день Kanban не реализует преимущества. Throughput = ${mean(k.tp).toFixed(1)} зад/ит.`;
+  document.getElementById('wip-rec-text').textContent=`Оптимальный WIP для команды ${p.team} чел. = ${Math.round(p.team*0.75)}–${p.team} задач/этап (закон Литтла). Текущий WIP=${p.wip}. ${p.wip>p.team?'Рекомендуется снизить WIP.':'Текущий WIP в норме.'}`;
+  const sw=[mean(s.ct)<mean(k.ct),sp>kp,mean(s.tp)>mean(k.tp)].filter(Boolean).length;
+  const kw=[mean(k.ct)<mean(s.ct),kp>sp,mean(k.tp)>mean(s.tp)].filter(Boolean).length;
+  const win=sw>kw?'Scrum':kw>sw?'Kanban':'Равнозначны';
+  const wc=win==='Scrum'?'var(--scrum)':win==='Kanban'?'var(--kanban)':'var(--muted)';
+  document.getElementById('verdict-text').innerHTML=`По результатам <strong>${p.iters.toLocaleString()}</strong> итераций Монте-Карло:<br><br><strong style="color:${wc};font-size:15px;">→ Рекомендуется: ${win}</strong><br><br>Scrum: cycle time = <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дн.</strong>, throughput = <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} зад/ит.</strong>, предсказуемость = <strong style="color:var(--scrum)">${sp.toFixed(2)}</strong><br>Kanban: cycle time = <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дн.</strong>, throughput = <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} зад/ит.</strong>, предсказуемость = <strong style="color:var(--kanban)">${kp.toFixed(2)}</strong><br><br><span style="color:var(--muted);font-size:10px;">σ=${p.sig.toFixed(2)} | Команда: ${p.team} чел. | Спринт: ${p.spd} дн. | WIP: ${p.wip} | Поток: ${p.flow.toFixed(1)} зад/день</span>`;
+}
+
+function renderKPIs(s,k){
+  document.getElementById('kpi-placeholder').style.display='none';
+  document.getElementById('kpi-grid').style.display='block';
+  const sTP=mean(s.tp),kTP=mean(k.tp),sCT=mean(s.ct),kCT=mean(k.ct),sLT=mean(s.lt),kLT=mean(k.lt),sP=1/(std(s.tp)/sTP+0.01),kP=1/(std(k.tp)/kTP+0.01);
+  function kpi(lbl,sv,kv,unit,lb){
+    const d=((kv-sv)/sv*100).toFixed(1);const kw=lb?kv<sv:kv>sv;const tie=Math.abs(d)<2;const cls=tie?'neutral':kw?'better':'worse';
+    return`<div class="kpi-label">${lbl}</div><div class="kpi-values"><div><div class="kpi-val scrum">${sv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Scrum</div></div><div><div class="kpi-val kanban">${kv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Kanban</div></div><div class="kpi-diff ${cls}">${kw?'▼':'▲'} ${Math.abs(d)}%</div></div>`;
+  }
+  document.getElementById('kpi-throughput').innerHTML=kpi('Пропускная способность',sTP,kTP,' зад/ит',false);
+  document.getElementById('kpi-cycletime').innerHTML=kpi('Цикловое время',sCT,kCT,' д',true);
+  document.getElementById('kpi-leadtime').innerHTML=kpi('Lead Time',sLT,kLT,' д',true);
+  document.getElementById('kpi-predict').innerHTML=kpi('Предсказуемость (1/CoV)',sP,kP,'',false);
+}
+
+// === MAIN RUN ===
+async function runSimulation(){
+  const btn=document.getElementById('btn-run');
+  const pw=document.getElementById('progress-wrap');
+  const pb=document.getElementById('progress-bar');
+  const pl=document.getElementById('progress-label');
+  btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
+  const p=getP();
+  pb.style.width='10%';pl.textContent='Подключение к API...';
+  try{
+    const body={...p,iters:+p.iters,vel:+p.vel,dur:+p.dur,team:+p.team,spd:+p.spd,wip:+p.wip};
+    pb.style.width='30%';pl.textContent='Счёт Монте-Карло на сервере...';
+    const res=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!res.ok){
+      let msg=res.statusText;
+      try{const j=await res.json();msg=typeof j.detail==='string'?j.detail:(Array.isArray(j.detail)?j.detail.map(x=>x.msg||x).join('; '):JSON.stringify(j));}catch(_){}
+      throw new Error(msg);
+    }
+    const data=await res.json();
+    pb.style.width='95%';pl.textContent='Построение графиков...';
+    applyPythonExport(data);
+    const badge=document.getElementById('badge-mc');
+    if(badge&&data.params) badge.textContent='Монте-Карло N='+Number(data.params.iters).toLocaleString();
+    pb.style.width='100%';pl.textContent='Готово!';
+  }catch(e){
+    pl.textContent='Ошибка: '+e.message;
+    alert('Ошибка: '+e.message);
+  }
+  btn.disabled=false;btn.textContent='▶ ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
+}
+
+// === TABS ===
+function switchTab(n){
+  const ns=['simulation','results','distributions','table','recs'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===n));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+}
+
+// === SLIDERS ===
+const LM={duration:v=>v,team:v=>v,uncertainty:v=>(v/100).toFixed(2),sprint:v=>v,velocity:v=>v,overhead:v=>v,wip:v=>v,cycle:v=>(v/10).toFixed(1),flow:v=>(v/10).toFixed(1)};
+function updateLabel(k){const v=document.getElementById('sl-'+k).value;document.getElementById('lbl-'+k).textContent=LM[k](v);}
+
+// === SCENARIOS ===
+const SC_DATA={
+  web:{dur:12,team:6,unc:30,spd:14,vel:42,ovh:15,wip:4,cyc:35,flow:22,desc:'<strong>Веб-приложение:</strong> Команда 5–7 чел., спринты 2 нед., умеренная неопределённость. Apache JIRA (WICKET, SOLR, TAPESTRY).'},
+  startup:{dur:8,team:4,unc:55,spd:7,vel:28,ovh:10,wip:3,cyc:25,flow:30,desc:'<strong>Стартап MVP:</strong> Высокая неопределённость σ=0.55, частые смены приоритетов, маленькая команда. GitHub Issues стартап-проектов.'},
+  enterprise:{dur:20,team:10,unc:20,spd:14,vel:65,ovh:22,wip:6,cyc:45,flow:18,desc:'<strong>Энтерпрайз:</strong> Крупный проект, большая команда, жёсткие процессы, overhead 22%. Apache JIRA корпоративных проектов.'},
+  maintenance:{dur:24,team:3,unc:40,spd:14,vel:20,ovh:8,wip:2,cyc:15,flow:45,desc:'<strong>Поддержка/обслуживание:</strong> Непрерывный поток багфиксов и hotfix. Поток 4.5 зад/день. Идеальный сценарий для Kanban.'}
+};
+function loadScenario(k,btn){
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const s=SC_DATA[k];
+  const map={dur:'duration',team:'team',unc:'uncertainty',spd:'sprint',vel:'velocity',ovh:'overhead',wip:'wip',cyc:'cycle',flow:'flow'};
+  Object.entries(map).forEach(([sk,id])=>{document.getElementById('sl-'+id).value=s[sk];updateLabel(id);});
+  document.getElementById('scenario-desc').innerHTML=s.desc;
+}
+
+['duration','team','uncertainty','sprint','velocity','overhead','wip','cycle','flow'].forEach(updateLabel);
+
+function applyPythonExport(py){
+  const p=py.params;
+  const scrum=py.scrum;
+  const kanban=py.kanban;
+  renderKPIs(scrum,kanban);
+  ['results','dist','table'].forEach(x=>{document.getElementById(x+'-placeholder').style.display='none';document.getElementById(x+'-content').style.display='block';});
+  document.getElementById('recs-placeholder').style.display='none';document.getElementById('recs-content').style.display='block';
+  barChart('chart-throughput',scrum.tp,kanban.tp,'Задач/итерацию');
+  barChart('chart-cycle',scrum.ct,kanban.ct,'Дней');
+  barChart('chart-lead',scrum.lt,kanban.lt,'Дней');
+  barChart('chart-completion',scrum.td,kanban.td,'Дней');
+  radarChart(scrum,kanban);
+  distChart('chart-dist-cycle',scrum.ct,kanban.ct,30,'Цикловое время (дни)');
+  distChart('chart-dist-tp',scrum.tp,kanban.tp,30,'Пропускная способность (зад/ит.)');
+  ciChart(scrum.ct,kanban.ct);
+  crChart(scrum.cr,kanban.wc);
+  metricsTable(scrum,kanban);
+  sigTable(scrum,kanban);
+  renderRecs(scrum,kanban,p);
+}
+</script>
+</body>
+</html>
