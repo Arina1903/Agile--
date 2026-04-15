@@ -48,7 +48,7 @@ function simScrum(p){
     let totT=0,totC=0,totCR=0;
     for(let s=0;s<p.dur;s++){
       const vel=clamp(randLN(Math.log(p.vel),p.sig),p.vel*0.3,p.vel*2.2);
-      const ovh=clamp(p.ovh*(1+0.3*randn()),0,0.4);
+      const ovh=clamp(p.ovh*(1+0.3*randn()),0,1);
       const tasks=Math.max(1,Math.round(vel/5*(1-ovh)));
       const planned=Math.round(p.vel/5*(1+0.1*randn()));
       totCR+=Math.min(tasks,planned)/Math.max(1,planned);

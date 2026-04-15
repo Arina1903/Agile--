@@ -74,7 +74,7 @@
   .progress-bar-bg { height: 3px; background: var(--border); border-radius: 2px; }
   .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.15s; }
   .progress-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: center; }
-  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: default; }
   .kpi-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
   .kpi-values { display: flex; gap: 10px; align-items: flex-end; }
   .kpi-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; line-height: 1; }
@@ -121,6 +121,43 @@
   .scenario-btn.active { border-color: var(--accent); color: var(--text); background: rgba(124,58,237,0.12); }
   .scenario-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
   select { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 11px; padding: 6px 10px; border-radius: 6px; width: 100%; outline: none; cursor: pointer; }
+  .label-with-tip { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; max-width: 100%; }
+  .param-tooltip {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; font-size: 11px; line-height: 1; border-radius: 50%;
+    background: rgba(124,58,237,0.2); color: var(--accent); cursor: help; flex-shrink: 0;
+    border: 1px solid rgba(124,58,237,0.35); vertical-align: middle;
+  }
+  .param-tooltip:hover, .param-tooltip:focus { outline: none; background: rgba(124,58,237,0.35); }
+  .param-tooltip-text {
+    display: none; position: absolute; z-index: 200; left: 0; bottom: calc(100% + 6px);
+    width: min(320px, 85vw); padding: 10px 12px; font-size: 10px; font-weight: 400;
+    line-height: 1.55; color: var(--text); text-align: left; letter-spacing: normal; text-transform: none;
+    background: #14141c; border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55); pointer-events: auto;
+  }
+  .param-tooltip:hover .param-tooltip-text,
+  .param-tooltip:focus .param-tooltip-text,
+  .param-tooltip:focus-within .param-tooltip-text { display: block; }
+  .tab-help { margin-bottom: 16px; }
+  .tab-help-recs {
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(90deg, rgba(124,58,237,0.08), transparent);
+  }
+  .sel-row-tip { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .kpi-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .kpi-head .kpi-label { margin-bottom: 0; flex: 1; }
+  .kpi-more {
+    flex-shrink: 0; font-family: inherit; font-size: 9px; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 4px 8px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--accent);
+    cursor: pointer; transition: background 0.15s;
+  }
+  .kpi-more:hover { background: rgba(124,58,237,0.12); }
+  .kpi-detail {
+    font-size: 10px; color: var(--muted); line-height: 1.65; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
 </style>
 </head>
 <body>
@@ -157,51 +194,51 @@
 
         <div style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Общие</div>
         <div class="control-group">
-          <div class="control-label"><span>Длительность проекта (итераций)</span><span id="lbl-duration">12</span></div>
+          <div class="control-label"><span class="label-with-tip">Длительность проекта (итераций)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Сколько шагов длится виртуальный проект. Один шаг ≈ один спринт (Scrum) или такой же по длине отрезок для Kanban. Календарные дни проекта ≈ число итераций × длительность спринта (дни).</span></span></span><span id="lbl-duration">12</span></div>
           <input type="range" id="sl-duration" min="6" max="24" value="12" oninput="updateLabel('duration')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Размер команды</span><span id="lbl-team">6</span></div>
+          <div class="control-label"><span class="label-with-tip">Размер команды<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Число людей в команде. Используется в подсказках по WIP (закон Литтла) и согласуется с выбранным сценарием.</span></span></span><span id="lbl-team">6</span></div>
           <input type="range" id="sl-team" min="3" max="12" value="6" oninput="updateLabel('team')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Коэффициент неопределённости (σ)</span><span id="lbl-uncertainty">0.30</span></div>
+          <div class="control-label"><span class="label-with-tip">Коэффициент неопределённости (σ)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">σ — масштаб случайных отклонений (логнормальные шумы вокруг velocity, длительностей и др.). Выше σ — шире разброс метрик между прогонами Монте-Карло.</span></span></span><span id="lbl-uncertainty">0.30</span></div>
           <input type="range" id="sl-uncertainty" min="10" max="70" value="30" oninput="updateLabel('uncertainty')">
         </div>
 
         <div class="separator"></div>
         <div style="font-size:10px;color:var(--scrum);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Scrum</div>
         <div class="control-group">
-          <div class="control-label"><span>Длительность спринта (дни)</span><span id="lbl-sprint">14</span></div>
+          <div class="control-label"><span class="label-with-tip">Длительность спринта (дни)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Длина одного спринта в календарных днях (7–31). Задаёт масштаб времени для Scrum и длину одного дискретного шага в модели Kanban.</span></span></span><span id="lbl-sprint">14</span></div>
           <input type="range" id="sl-sprint" min="7" max="31" value="14" oninput="updateLabel('sprint')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Базовая скорость (story points)</span><span id="lbl-velocity">42</span></div>
-          <input type="range" id="sl-velocity" min="20" max="80" value="42" oninput="updateLabel('velocity')">
+          <div class="control-label"><span class="label-with-tip">Базовая скорость (story points)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Ожидаемая «ёмкость» спринта в story points (относительные единицы). В симуляции от неё считается число задач с учётом накладных и случайности.</span></span></span><span id="lbl-velocity">42</span></div>
+          <input type="range" id="sl-velocity" min="1" max="160" value="42" oninput="updateLabel('velocity')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Накладные расходы церемоний (%)</span><span id="lbl-overhead">15</span></div>
-          <input type="range" id="sl-overhead" min="5" max="30" value="15" oninput="updateLabel('overhead')">
+          <div class="control-label"><span class="label-with-tip">Накладные расходы церемоний (%)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Доля времени спринта на Scrum-церемонии (планирование, дейли, ревью, ретро и т.д.), а не на работу по задачам, 1–100%. Чем выше — тем меньше эффективной ёмкости в формуле задач.</span></span></span><span id="lbl-overhead">15</span></div>
+          <input type="range" id="sl-overhead" min="1" max="100" value="15" oninput="updateLabel('overhead')">
         </div>
 
         <div class="separator"></div>
         <div style="font-size:10px;color:var(--kanban);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Kanban</div>
         <div class="control-group">
-          <div class="control-label"><span>WIP-лимит на этап</span><span id="lbl-wip">4</span></div>
+          <div class="control-label"><span class="label-with-tip">WIP-лимит на этап<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Максимум задач одновременно на этапе канбан-доски (WIP-лимит). Регулирует параллелизм и очереди в ветке Kanban модели.</span></span></span><span id="lbl-wip">4</span></div>
           <input type="range" id="sl-wip" min="1" max="10" value="4" oninput="updateLabel('wip')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Базовый цикл задачи (дни)</span><span id="lbl-cycle">3.5</span></div>
+          <div class="control-label"><span class="label-with-tip">Базовый цикл задачи (дни)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Типичное цикловое время одной задачи для Kanban: значение слайдера делится на 10 (на экране 3.5 соответствует положению 35). Задаёт центр логнормального разброса длительностей.</span></span></span><span id="lbl-cycle">3.5</span></div>
           <input type="range" id="sl-cycle" min="10" max="80" value="35" oninput="updateLabel('cycle')">
         </div>
         <div class="control-group">
-          <div class="control-label"><span>Интенсивность потока (задач/день)</span><span id="lbl-flow">2.2</span></div>
+          <div class="control-label"><span class="label-with-tip">Интенсивность потока (задач/день)<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Ожидаемая интенсивность потока задач в день для Kanban (значение слайдера / 10). Влияет на загрузку системы при заданном WIP.</span></span></span><span id="lbl-flow">2.2</span></div>
           <input type="range" id="sl-flow" min="5" max="50" value="22" oninput="updateLabel('flow')">
         </div>
 
         <div class="separator"></div>
         <div style="margin-bottom:12px;">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;">Количество итераций</div>
+          <div class="sel-row-tip" style="font-size:10px;color:var(--muted);">Количество итераций<span class="param-tooltip" tabindex="0">ⓘ<span class="param-tooltip-text">Сколько независимых прогонов Монте-Карло выполнить локально в браузере. Больше прогонов — точнее оценки, дольше счёт.</span></span></div>
           <select id="sel-iters">
             <option value="1000">1 000 (быстро)</option>
             <option value="5000">5 000</option>
@@ -254,6 +291,9 @@
     <div class="icon">📊</div><p>Запустите симуляцию</p>
   </div>
   <div id="results-content" style="display:none;">
+    <div class="dataset-info tab-help">
+      <strong>Результаты.</strong> Столбиковые диаграммы по выборке прогонов Монте-Карло: для Scrum и Kanban показаны перцентили (P10–P90), медиана и среднее — по пропускной способности, циклу, lead time и прогнозу срока завершения проекта. Это «срез» типичных значений метрик при текущих параметрах.
+    </div>
     <div class="grid-2" style="margin-bottom:14px;">
       <div class="card"><div class="card-title">Пропускная способность (задач/итерацию)</div><div class="chart-wrap"><canvas id="chart-throughput"></canvas></div></div>
       <div class="card"><div class="card-title">Цикловое время (дни)</div><div class="chart-wrap"><canvas id="chart-cycle"></canvas></div></div>
@@ -262,9 +302,6 @@
       <div class="card"><div class="card-title">Lead Time — время от начала до сдачи (дни)</div><div class="chart-wrap"><canvas id="chart-lead"></canvas></div></div>
       <div class="card"><div class="card-title">Прогноз завершения проекта (дни)</div><div class="chart-wrap"><canvas id="chart-completion"></canvas></div></div>
     </div>
-    <div class="card"><div class="card-title">Интегральная оценка по 6 метрикам (радар)</div>
-      <div style="max-width:480px;margin:0 auto;"><div class="chart-wrap tall"><canvas id="chart-radar"></canvas></div></div>
-    </div>
   </div>
 </div>
 
@@ -272,6 +309,9 @@
 <div id="tab-distributions" class="tab-panel">
   <div id="dist-placeholder" class="placeholder" style="height:260px;"><div class="icon">〜</div><p>Запустите симуляцию</p></div>
   <div id="dist-content" style="display:none;">
+    <div class="dataset-info tab-help">
+      <strong>Распределения.</strong> Гистограммы и профили показывают форму распределений метрик по множеству прогонов, а не одно число: видно разброс, хвосты и перекрытие Scrum/Kanban. Радар внизу — условная интегральная нормировка шести показателей для сравнения «профилей» подходов.
+    </div>
     <div class="grid-2" style="margin-bottom:14px;">
       <div class="card">
         <div class="card-title">Распределение цикловых времён</div>
@@ -284,9 +324,13 @@
         <div class="chart-wrap tall"><canvas id="chart-dist-tp"></canvas></div>
       </div>
     </div>
-    <div class="grid-2">
+    <div class="grid-2" style="margin-bottom:14px;">
       <div class="card"><div class="card-title">Перцентильный профиль — Цикловое время</div><div class="chart-wrap"><canvas id="chart-ci-cycle"></canvas></div></div>
       <div class="card"><div class="card-title">Завершение спринта / WIP-соблюдение (%)</div><div class="chart-wrap"><canvas id="chart-completion-rate"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <div class="card-title">Интегральная оценка по 6 метрикам (радар)</div>
+      <div style="max-width:480px;margin:0 auto;"><div class="chart-wrap tall"><canvas id="chart-radar"></canvas></div></div>
     </div>
   </div>
 </div>
@@ -295,6 +339,9 @@
 <div id="tab-table" class="tab-panel">
   <div id="table-placeholder" class="placeholder" style="height:260px;"><div class="icon">≡</div><p>Запустите симуляцию</p></div>
   <div id="table-content" style="display:none;">
+    <div class="dataset-info tab-help">
+      <strong>Сводная таблица.</strong> По каждой метрике: среднее (μ) и стандартное отклонение по прогонам, робастный диапазон P10–P90, относительная разница средних Kanban vs Scrum (Δ%) и эвристический «лучший» столбец. Вторая таблица — приближённая проверка значимости различия (Welch / p-value, Cohen’s d); трактуется как ориентир при большом N.
+    </div>
     <div class="card" style="margin-bottom:14px;">
       <div class="card-title">Сводная таблица метрик — Приложение Б</div>
       <div style="overflow-x:auto;">
@@ -323,6 +370,9 @@
 <div id="tab-recs" class="tab-panel">
   <div id="recs-placeholder" class="placeholder" style="height:200px;"><div class="icon">✦</div><p>Запустите симуляцию</p></div>
   <div id="recs-content" style="display:none;">
+    <div class="dataset-info tab-help tab-help-recs" style="margin-bottom:18px;">
+      <strong>Рекомендации — главный смысл этой вкладки.</strong> Здесь не дублируются графики, а <strong>интерпретируются</strong> результаты симуляции: типовые аргументы за Scrum и Kanban, адаптивные абзацы после запуска (зависят от σ, потока, WIP) и итоговый вердикт по упрощённому голосованию по метрикам. Это <strong>эвристический слой</strong> над моделью для обоснования выбора методологии в ВКР, а не гарантия для реального проекта. В этой HTML-версии расчёт выполняется в браузере.
+    </div>
     <div class="grid-2" style="margin-bottom:18px;align-items:start;">
       <div>
         <div class="rec-title" style="color:var(--scrum)">Когда выбирать Scrum</div>
@@ -362,6 +412,13 @@ function pct(a,p){const s=[...a].sort((x,y)=>x-y);return s[Math.floor(p/100*(s.l
 function cohensD(a,b){const ma=mean(a),mb=mean(b),sa=std(a),sb=std(b),sp=Math.sqrt((sa**2+sb**2)/2);return Math.abs(ma-mb)/(sp||1);}
 function pValue(a,b){const ma=mean(a),mb=mean(b),sa=std(a),sb=std(b),n=Math.min(a.length,b.length),se=Math.sqrt(sa**2/n+sb**2/n),t=Math.abs(ma-mb)/(se||1);if(t>3.5)return'< 0.001';if(t>2.5)return'< 0.01';if(t>1.96)return'< 0.05';return'≥ 0.05';}
 
+const KPI_HELP={
+  throughput:'Среднее число завершённых задач на одну итерацию проекта по всем прогонам Монте-Карло (сумма задач за проект / число итераций, затем усреднение по прогонам). Справа: относительная разница средних Kanban и Scrum в процентах от среднего Scrum: (μ<sub>K</sub>−μ<sub>S</sub>)/μ<sub>S</sub>×100%.',
+  cycletime:'Среднее цикловое время задачи в днях по выборке прогонов. В модели — показатель «сколько в среднем занимает прохождение работы по задаче». Для сравнения лучше меньшее значение; процент справа считается так же относительно Scrum.',
+  leadtime:'Средний Lead Time в днях — упрощённое время от постановки в работу до готовности в симуляции. Сравнение и Δ% — как для циклового времени (лучше — меньше).',
+  predict:'Показатель «стабильности» пропускной способности: 1 / (коэффициент вариации + 0.01), где CoV = std(tp) / mean(tp) по прогонам. Чем выше число, тем меньше относительный разброс throughput между прогонами. Справа — относительное отличие средних Kanban и Scrum.'
+};
+
 // === SIMULATION ===
 let SR=null;
 function getP(){
@@ -385,7 +442,7 @@ function simScrum(p){
     let totT=0,totC=0,totCR=0;
     for(let s=0;s<p.dur;s++){
       const vel=clamp(randLN(Math.log(p.vel),p.sig),p.vel*0.3,p.vel*2.2);
-      const ovh=clamp(p.ovh*(1+0.3*randn()),0,0.4);
+      const ovh=clamp(p.ovh*(1+0.3*randn()),0,1);
       const tasks=Math.max(1,Math.round(vel/5*(1-ovh)));
       const planned=Math.round(p.vel/5*(1+0.1*randn()));
       totCR+=Math.min(tasks,planned)/Math.max(1,planned);
@@ -537,14 +594,15 @@ function renderKPIs(s,k){
   document.getElementById('kpi-placeholder').style.display='none';
   document.getElementById('kpi-grid').style.display='block';
   const sTP=mean(s.tp),kTP=mean(k.tp),sCT=mean(s.ct),kCT=mean(k.ct),sLT=mean(s.lt),kLT=mean(k.lt),sP=1/(std(s.tp)/sTP+0.01),kP=1/(std(k.tp)/kTP+0.01);
-  function kpi(lbl,sv,kv,unit,lb){
+  function kpi(key,lbl,sv,kv,unit,lb){
     const d=((kv-sv)/sv*100).toFixed(1);const kw=lb?kv<sv:kv>sv;const tie=Math.abs(d)<2;const cls=tie?'neutral':kw?'better':'worse';
-    return`<div class="kpi-label">${lbl}</div><div class="kpi-values"><div><div class="kpi-val scrum">${sv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Scrum</div></div><div><div class="kpi-val kanban">${kv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Kanban</div></div><div class="kpi-diff ${cls}">${kw?'▼':'▲'} ${Math.abs(d)}%</div></div>`;
+    const hint=KPI_HELP[key]||'';
+    return`<div class="kpi-head"><span class="kpi-label">${lbl}</span><button type="button" class="kpi-more">Пояснение ▼</button></div><div class="kpi-values"><div><div class="kpi-val scrum">${sv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Scrum</div></div><div><div class="kpi-val kanban">${kv.toFixed(1)}<span style="font-size:11px;color:var(--muted)">${unit}</span></div><div class="kpi-sub">Kanban</div></div><div class="kpi-diff ${cls}">${kw?'▼':'▲'} ${Math.abs(d)}%</div></div><div class="kpi-detail" hidden>${hint}</div>`;
   }
-  document.getElementById('kpi-throughput').innerHTML=kpi('Пропускная способность',sTP,kTP,' зад/ит',false);
-  document.getElementById('kpi-cycletime').innerHTML=kpi('Цикловое время',sCT,kCT,' д',true);
-  document.getElementById('kpi-leadtime').innerHTML=kpi('Lead Time',sLT,kLT,' д',true);
-  document.getElementById('kpi-predict').innerHTML=kpi('Предсказуемость (1/CoV)',sP,kP,'',false);
+  document.getElementById('kpi-throughput').innerHTML=kpi('throughput','Пропускная способность',sTP,kTP,' зад/ит',false);
+  document.getElementById('kpi-cycletime').innerHTML=kpi('cycletime','Цикловое время',sCT,kCT,' д',true);
+  document.getElementById('kpi-leadtime').innerHTML=kpi('leadtime','Lead Time',sLT,kLT,' д',true);
+  document.getElementById('kpi-predict').innerHTML=kpi('predict','Предсказуемость (1/CoV)',sP,kP,'',false);
 }
 
 // === MAIN RUN ===
@@ -632,6 +690,22 @@ function applyPythonExport(py){
   sigTable(scrum,kanban);
   renderRecs(scrum,kanban,p);
 }
+
+(function(){
+  const grid=document.getElementById('kpi-grid');
+  if(!grid)return;
+  grid.addEventListener('click',function(e){
+    const btn=e.target.closest('.kpi-more');
+    if(!btn)return;
+    e.preventDefault();
+    const card=btn.closest('.kpi-card');
+    const det=card.querySelector('.kpi-detail');
+    if(!det)return;
+    const show=det.hasAttribute('hidden');
+    if(show){det.removeAttribute('hidden');btn.textContent='Свернуть ▲';}
+    else{det.setAttribute('hidden','');btn.textContent='Пояснение ▼';}
+  });
+})();
 </script>
 </body>
 </html>

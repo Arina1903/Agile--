@@ -86,7 +86,7 @@ def simulate_scrum_html(p: HtmlModelParams, rng: np.random.Generator) -> ScrumMo
             ovh = _clamp(
                 p.scrum_overhead * (1.0 + 0.3 * _randn(rng, 1)),
                 0.0,
-                0.4,
+                1.0,
             )[0]
             tasks = max(1, int(np.round(vel / 5.0 * (1.0 - ovh))))
             planned = int(np.round(p.base_velocity / 5.0 * (1.0 + 0.1 * _randn(rng, 1))[0]))
