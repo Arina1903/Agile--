@@ -724,10 +724,6 @@ async function runSimulation(){
 
 // === TABS ===
 function switchTab(n){
-  if (n !== 'simulation' && !simulationHasRun) {
-    alert('Пожалуйста, сначала запустите симуляцию (нажмите кнопку "ЗАПУСТИТЬ СИМУЛЯЦИЮ"), чтобы увидеть результаты.');
-    return;
-  }
   const ns=['simulation','results','distributions','table','recs','history'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===n));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
