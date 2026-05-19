@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Монте-Карло: Scrum vs Kanban</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #f8fafc;
@@ -25,7 +25,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 15px;
     min-height: 100vh;
     overflow-x: hidden;
@@ -42,7 +42,7 @@
   .wrapper { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 24px 80px; }
   header { padding: 36px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
   .header-tag { font-size: 13px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
-  header h1 { font-family: 'Syne', sans-serif; font-size: clamp(20px, 3.5vw, 36px); font-weight: 800; line-height: 1.15; color: var(--text); margin-bottom: 8px; }
+  header h1 { font-family: 'Montserrat', sans-serif; font-size: clamp(20px, 3.5vw, 36px); font-weight: 800; line-height: 1.15; color: var(--text); margin-bottom: 8px; }
   header p { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 700px; }
   .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .badge { padding: 3px 10px; border-radius: 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
@@ -59,14 +59,14 @@
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
   .card { background: var(--card); border: 2px solid var(--border); border-radius: 10px; padding: 18px; }
-  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .card-title { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
   .control-group { margin-bottom: 12px; }
   .control-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-bottom: 5px; }
   .control-label span:last-child { color: var(--text); font-weight: 600; }
   input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; background: var(--border); border-radius: 2px; outline: none; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; background: var(--accent); border-radius: 50%; cursor: pointer;  }
   .separator { height: 1px; background: var(--border); margin: 14px 0; }
-  .btn-run { width: 100%; padding: 13px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #4f46e5); color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.2s;  }
+  .btn-run { width: 100%; padding: 13px; border: none; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #4f46e5); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: all 0.2s;  }
   .btn-run:hover { transform: translateY(-2px);  }
   .btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .progress-wrap { margin-top: 10px; display: none; }
@@ -77,7 +77,7 @@
   .kpi-card { background: var(--card); border: 2px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: default; }
   .kpi-label { font-size: 13px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
   .kpi-values { display: flex; gap: 10px; align-items: flex-end; }
-  .kpi-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
+  .kpi-val { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
   .kpi-val.scrum { color: var(--scrum); }
   .kpi-val.kanban { color: var(--kanban); }
   .kpi-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
@@ -102,11 +102,11 @@
   .rec-card.scrum-rec { border-color: var(--scrum); }
   .rec-card.kanban-rec { border-color: var(--kanban); }
   .rec-card.general { border-color: var(--accent); }
-  .rec-card h4 { font-family: 'Syne', sans-serif; font-size: 15px; margin-bottom: 6px; }
+  .rec-card h4 { font-family: 'Montserrat', sans-serif; font-size: 15px; margin-bottom: 6px; }
   .rec-card p { color: var(--muted); font-size: 14px; line-height: 1.7; }
   .rec-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
   .rec-tag { font-size: 12px; padding: 2px 7px; border-radius: 3px; background: #f1f5f9; color: var(--muted); }
-  .rec-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  .rec-title { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; }
   .legend { display: flex; gap: 14px; align-items: center; margin-bottom: 10px; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--muted); }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
@@ -416,6 +416,7 @@
 
 </div>
 <script>
+let simulationHasRun = false;
 // === UTILS ===
 function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function randLN(mu,s){return Math.exp(mu+s*randn());}
@@ -603,6 +604,10 @@ async function runSimulation(){
 
 // === TABS ===
 function switchTab(n){
+  if (n !== 'simulation' && !simulationHasRun) {
+    alert('Пожалуйста, сначала запустите симуляцию (нажмите кнопку "ЗАПУСТИТЬ СИМУЛЯЦИЮ"), чтобы увидеть результаты.');
+    return;
+  }
   const ns=['simulation','results','distributions','table','recs','history'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===n));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
