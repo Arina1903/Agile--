@@ -631,7 +631,7 @@ function saveHistory(p, s, k) {
     win: mean(s.ct) < mean(k.ct) ? 'Scrum' : 'Kanban'
   });
   const t = document.getElementById('history-tbody');
-  if(t) t.innerHTML = runHistory.map((h,i) => `<tr style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" onclick="restoreHistory(${i})" title="Нажмите, чтобы загрузить этот прогон"><td>#${i+1} (${h.time})</td><td>σ=${h.p.sig.toFixed(2)}, team=${h.p.team}, wip=${h.p.wip}</td><td><strong>${h.s_ct.toFixed(1)} дн.</strong></td><td><strong>${h.k_ct.toFixed(1)} дн.</strong></td><td style="color:${h.win==='Scrum'?'var(--scrum)':'var(--kanban)'; font-weight: bold;}">${h.win}</td></tr>`).reverse().join('');
+  if(t) t.innerHTML = runHistory.map((h,i) => `<tr style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" onclick="restoreHistory(${i})" title="Нажмите, чтобы загрузить этот прогон"><td>#${i+1} (${h.time})</td><td>σ=${h.p.sig.toFixed(2)}, team=${h.p.team}, wip=${h.p.wip}</td><td><strong>${h.s_ct.toFixed(1)} дн.</strong></td><td><strong>${h.k_ct.toFixed(1)} дн.</strong></td><td style="color:${h.win==='Scrum'?'var(--scrum)':'var(--kanban)'}; font-weight: bold;">${h.win}</td></tr>`).reverse().join('');
 }
 
 function restoreHistory(idx) {
