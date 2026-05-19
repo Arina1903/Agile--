@@ -117,7 +117,7 @@ function metricsTable(s,k){
 }
 
 function sigTable(s,k){
-  const rows=[{n:'Цикловое время',a:s.ct,b:k.ct},{n:'Lead Time',a:s.lt,b:k.lt},{n:'Пропускная способность',a:s.tp,b:k.tp},{n:'Дефекты',a:s.def,b:k.def}];
+  const rows=[{n:'Цикловое время',a:s.ct,b:k.ct},{n:'Время выполнения',a:s.lt,b:k.lt},{n:'Пропускная способность',a:s.tp,b:k.tp},{n:'Дефекты',a:s.def,b:k.def}];
   document.getElementById('sig-tbody').innerHTML=rows.map(r=>{
     const pv=pValue(r.a,r.b),d=cohensD(r.a,r.b).toFixed(3),sig=pv==='≥ 0.05'?'❌ Не значимо':'✓ Значимо';
     const ef=parseFloat(d)<0.2?'Малый':parseFloat(d)<0.5?'Средний':parseFloat(d)<0.8?'Большой':'Очень большой';
@@ -145,16 +145,16 @@ function renderRecs(s,k,p){
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
   <div style="background:#f0f9ff;border:2px solid #bae6fd;border-radius:8px;padding:14px;">
     <div style="font-size:14px;font-weight:700;color:var(--scrum);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Scrum</div>
-    <div style="font-size:16px;margin-bottom:6px;">Cycle Time: <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дн.</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Throughput: <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} зад/ит.</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Lead Time: <strong style="color:var(--scrum)">${mean(s.lt).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Цикловое время: <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дней</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} задач/итерацию</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Время выполнения: <strong style="color:var(--scrum)">${mean(s.lt).toFixed(2)} дней</strong></div>
     <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--scrum)">${sp.toFixed(2)}</strong></div>
   </div>
   <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:8px;padding:14px;">
     <div style="font-size:14px;font-weight:700;color:var(--kanban);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Kanban</div>
-    <div style="font-size:16px;margin-bottom:6px;">Cycle Time: <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дн.</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Throughput: <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} зад/ит.</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Lead Time: <strong style="color:var(--kanban)">${mean(k.lt).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Цикловое время: <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дней</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} задач/итерацию</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Время выполнения: <strong style="color:var(--kanban)">${mean(k.lt).toFixed(2)} дней</strong></div>
     <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--kanban)">${kp.toFixed(2)}</strong></div>
   </div>
 </div>
@@ -176,8 +176,8 @@ function renderKPIs(s,k){
   }
   document.getElementById('kpi-throughput').innerHTML=kpi('throughput','Пропускная способность',sTP,kTP,' зад/ит',false);
   document.getElementById('kpi-cycletime').innerHTML=kpi('cycletime','Цикловое время',sCT,kCT,' д',true);
-  document.getElementById('kpi-leadtime').innerHTML=kpi('leadtime','Lead Time',sLT,kLT,' д',true);
-  document.getElementById('kpi-predict').innerHTML=kpi('predict','Предсказуемость (1/CoV)',sP,kP,'',false);
+  document.getElementById('kpi-leadtime').innerHTML=kpi('leadtime','Время выполнения',sLT,kLT,' д',true);
+  document.getElementById('kpi-predict').innerHTML=kpi('predict','Предсказуемость',sP,kP,'',false);
 }
 
 // === MAIN RUN ===
