@@ -309,7 +309,7 @@
       <strong>Результаты.</strong> Столбиковые диаграммы по выборке прогонов Монте-Карло: для Scrum и Kanban показаны перцентили (P10–P90), медиана и среднее — по пропускной способности, циклу, lead time и прогнозу срока завершения проекта. Это «срез» типичных значений метрик при текущих параметрах.
     </div>
     <div class="grid-2" style="margin-bottom:14px;">
-      <div class="card"><div class="card-title">Пропускная способность (задач/итерацию)</div><div class="chart-wrap"><canvas id="chart-throughput"></canvas></div><div id="mc-tp" style="font-size:14px;color:var(--muted);margin-top:10px;"></div></div>
+      <div class="card"><div class="card-title">Пропускная способность (задач в итерацию)</div><div class="chart-wrap"><canvas id="chart-throughput"></canvas></div><div id="mc-tp" style="font-size:14px;color:var(--muted);margin-top:10px;"></div></div>
       <div class="card"><div class="card-title">Цикловое время (дни)</div><div class="chart-wrap"><canvas id="chart-cycle"></canvas></div><div id="mc-cyc" style="font-size:14px;color:var(--muted);margin-top:10px;"></div></div>
     </div>
     <div class="grid-2" style="margin-bottom:14px;">
@@ -641,14 +641,14 @@ function renderRecs(s,k,p){
   <div style="background:#f0f9ff;border:2px solid #bae6fd;border-radius:8px;padding:14px;">
     <div style="font-size:14px;font-weight:700;color:var(--scrum);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Scrum</div>
     <div style="font-size:16px;margin-bottom:6px;">Цикловое время: <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дней</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} задач/итерацию</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} задач в итерацию</strong></div>
     <div style="font-size:16px;margin-bottom:6px;">Время выполнения: <strong style="color:var(--scrum)">${mean(s.lt).toFixed(2)} дней</strong></div>
     <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--scrum)">${sp.toFixed(2)}</strong></div>
   </div>
   <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:8px;padding:14px;">
     <div style="font-size:14px;font-weight:700;color:var(--kanban);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Kanban</div>
     <div style="font-size:16px;margin-bottom:6px;">Цикловое время: <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дней</strong></div>
-    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} задач/итерацию</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Пропускная способность: <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} задач в итерацию</strong></div>
     <div style="font-size:16px;margin-bottom:6px;">Время выполнения: <strong style="color:var(--kanban)">${mean(k.lt).toFixed(2)} дней</strong></div>
     <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--kanban)">${kp.toFixed(2)}</strong></div>
   </div>
