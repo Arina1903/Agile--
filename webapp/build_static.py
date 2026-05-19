@@ -121,34 +121,71 @@ async function runSimulation(){
   const pw=document.getElementById('progress-wrap');
   const pb=document.getElementById('progress-bar');
   const pl=document.getElementById('progress-label');
-  btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
+  btn.disabled=true;btn.textContent='СИМУЛЯЦИЯ...';pw.classList.add('visible');
   const p=getP();
-  pb.style.width='10%';pl.textContent='10% — Подключение к API...';
+
+  // Animated progress helper
+  let _pct = 0;
+  let _interval = null;
+  function setProgress(pct, label) {
+    _pct = pct;
+    pb.style.width = pct + '%';
+    pb.textContent = pct + '%';
+    pl.textContent = label;
+  }
+  function animateTo(target, label, stepMs) {
+    return new Promise(resolve => {
+      _interval && clearInterval(_interval);
+      _interval = setInterval(() => {
+        if (_pct < target) {
+          _pct = Math.min(_pct + 1, target);
+          pb.style.width = _pct + '%';
+          pb.textContent = _pct + '%';
+          pl.textContent = label + ' ' + _pct + '%';
+        } else {
+          clearInterval(_interval);
+          resolve();
+        }
+      }, stepMs);
+    });
+  }
+
   try{
+    setProgress(0, 'Инициализация...');
+    await animateTo(15, 'Подключение к API...', 30);
+
     const body={...p,iters:+p.iters,vel:+p.vel,dur:+p.dur,team:+p.team,spd:+p.spd,wip:+p.wip};
-    pb.style.width='30%';pl.textContent='30% — Счёт Монте-Карло на сервере...';
+
+    // Start slow animation 15->88% while server computes
+    const fakeAnim = animateTo(88, 'Монте-Карло на сервере...', 80);
+
     const res=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!res.ok){
+      clearInterval(_interval);
       let msg=res.statusText;
       try{const j=await res.json();msg=typeof j.detail==='string'?j.detail:(Array.isArray(j.detail)?j.detail.map(x=>x.msg||x).join('; '):JSON.stringify(j));}catch(_){}
       throw new Error(msg);
     }
     const data=await res.json();
-    pb.style.width='95%';pl.textContent='95% — Построение графиков...';
+    clearInterval(_interval);
+
+    await animateTo(95, 'Построение графиков...', 20);
     applyPythonExport(data);
     simulationHasRun = true;
     const badge=document.getElementById('badge-mc');
     if(badge&&data.params) badge.textContent='Монте-Карло N='+Number(data.params.iters).toLocaleString();
-    pb.style.width='100%';pl.textContent='100% — Готово!';
+    await animateTo(100, 'Готово!', 15);
+    pl.textContent = 'Симуляция завершена успешно.';
   }catch(e){
+    clearInterval(_interval);
     pl.textContent='Ошибка: '+e.message;
     alert('Ошибка: '+e.message);
   }
-  btn.disabled=false;btn.textContent='▶ ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
+  btn.disabled=false;btn.textContent='ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
 }"""
 
     import re
-    match = re.search(r'// === MAIN RUN ===.*?btn\.disabled=false;btn\.textContent=\'▶ ЗАПУСТИТЬ СНОВА\';pw\.classList\.remove\(\'visible\'\);\n}', text, flags=re.DOTALL)
+    match = re.search(r'// === MAIN RUN ===.*?btn\.disabled=false;btn\.textContent=.*?;pw\.classList\.remove\(\'visible\'\);\n}', text, flags=re.DOTALL)
     if not match:
         raise SystemExit("Шаблон: блок runSimulation не найден.")
     text = text[:match.start()] + new_run + text[match.end():]

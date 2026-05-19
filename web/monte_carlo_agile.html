@@ -189,7 +189,7 @@
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('simulation')">⚙ Симуляция</button>
-  <button class="tab" onclick="switchTab('results')">📊 Результаты</button>
+  <button class="tab" onclick="switchTab('results')">Результаты</button>
   <button class="tab" onclick="switchTab('distributions')">〜 Распределения</button>
   <button class="tab" onclick="switchTab('table')">≡ Сводная таблица</button>
   <button class="tab" onclick="switchTab('recs')">✦ Рекомендации</button>
@@ -302,7 +302,7 @@
 <!-- TAB: RESULTS -->
 <div id="tab-results" class="tab-panel">
   <div id="results-placeholder" class="placeholder" style="height:260px;">
-    <div class="icon">📊</div><p>Запустите симуляцию</p>
+    <div class="icon"></div><p>Запустите симуляцию</p>
   </div>
   <div id="results-content" style="display:none;">
     <div class="dataset-info tab-help">
@@ -388,9 +388,9 @@
     <div class="dataset-info tab-help tab-help-recs" style="margin-bottom:18px;">
       <strong>Рекомендации — главный смысл этой вкладки.</strong> Здесь не дублируются графики, а <strong>интерпретируются</strong> результаты симуляции: типовые аргументы за Scrum и Kanban, адаптивные абзацы после запуска (зависят от σ, потока, WIP) и итоговый вердикт по упрощённому голосованию по метрикам. Это <strong>эвристический слой</strong> над моделью для обоснования выбора методологии в ВКР, а не гарантия для реального проекта. В этой HTML-версии расчёт выполняется в браузере.
     </div>
-    <div class="card" id="final-verdict" style="margin-bottom:18px;">
-      <div class="card-title">Итоговый вердикт симуляции</div>
-      <div id="verdict-text" style="font-size:12px;line-height:1.9;color:var(--text);"></div>
+    <div class="card" id="final-verdict" style="margin-bottom:24px;border:3px solid var(--accent);background:#f8f8ff;">
+      <div class="card-title" style="font-size:18px;color:var(--accent);margin-bottom:18px;">Итоговый вердикт симуляции</div>
+      <div id="verdict-text" style="font-size:16px;line-height:2.0;color:var(--text);font-family:'Inter',sans-serif;"></div>
     </div>
     <div class="grid-2" style="margin-bottom:18px;align-items:start;">
       <div>
@@ -533,10 +533,10 @@ function simKanban(p){
 const CH={};
 const SC='#0284c7',KC='#ea580c',SD='rgba(2,132,199,0.18)',KD='rgba(234,88,12,0.18)',GR='#cbd5e1',TC='#1e293b';
 const BOpts={responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{labels:{color:TC,font:{family:'Inter',size:15,weight:'600'},boxWidth:14,padding:16}},
+  plugins:{legend:{labels:{color:TC,font:{family:'Inter',size:16,weight:'700'},boxWidth:16,padding:18}},
     tooltip:{backgroundColor:'#ffffff',borderColor:'#94a3b8',borderWidth:2,titleColor:'#0f172a',bodyColor:'#334155',titleFont:{family:'Inter',size:15,weight:'700'},bodyFont:{family:'Inter',size:14},padding:10,cornerRadius:8,displayColors:true}},
-  scales:{x:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:14,weight:'500'}}},
-    y:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:14,weight:'500'}}}}};
+  scales:{x:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:15,weight:'600'}}},
+    y:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:15,weight:'600'}}}}};
 
 function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
 
@@ -547,7 +547,7 @@ function barChart(id,sD,kD,yLabel){
   const kv=[pct(kD,10),pct(kD,25),pct(kD,50),mean(kD),pct(kD,75),pct(kD,90)];
   CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'bar',
     data:{labels:labs,datasets:[{label:'Scrum',data:sv,backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban',data:kv,backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
-    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,title:{display:true,text:yLabel,color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,title:{display:true,text:yLabel,color:TC,font:{family:'Inter',size:16,weight:'700'}}}}}});
 }
 
 function radarChart(s,k){
@@ -560,7 +560,7 @@ function radarChart(s,k){
   CH['chart-radar']=new Chart(document.getElementById('chart-radar').getContext('2d'),{type:'radar',
     data:{labels:['Пропускная\nспособность','Цикловое\nвремя ↓','Lead Time ↓','Качество ↓','Завершение\nспринта/WIP','Предсказуе\nмость'],
       datasets:[{label:'Scrum',data:sv,backgroundColor:'rgba(0,212,255,0.1)',borderColor:SC,borderWidth:2,pointBackgroundColor:SC},{label:'Kanban',data:kv,backgroundColor:'rgba(255,107,53,0.1)',borderColor:KC,borderWidth:2,pointBackgroundColor:KC}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:GR},ticks:{color:TC,backdropColor:'transparent',font:{family:'Inter',size:13,weight:'500'}},pointLabels:{color:TC,font:{family:'Inter',size:14,weight:'500'}}}},plugins:{...BOpts.plugins}}});
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:GR},ticks:{color:TC,backdropColor:'transparent',font:{family:'Inter',size:14,weight:'600'}},pointLabels:{color:TC,font:{family:'Inter',size:15,weight:'700'}}}},plugins:{...BOpts.plugins}}});
 }
 
 function distChart(id,sD,kD,bins,xlabel){
@@ -570,7 +570,7 @@ function distChart(id,sD,kD,bins,xlabel){
   function bld(d){const c=new Array(bins).fill(0);d.forEach(v=>{const b=clamp(Math.floor((v-mn)/step),0,bins-1);c[b]++;});return c.map(x=>x/d.length*100);}
   CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'line',
     data:{labels:labs,datasets:[{label:'Scrum',data:bld(sD),backgroundColor:SD,borderColor:SC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0},{label:'Kanban',data:bld(kD),backgroundColor:KD,borderColor:KC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0}]},
-    options:{...BOpts,scales:{x:{...BOpts.scales.x,title:{display:true,text:xlabel,color:TC,font:{family:'Inter',size:14,weight:'500'}}},y:{...BOpts.scales.y,title:{display:true,text:'Частота (%)',color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
+    options:{...BOpts,scales:{x:{...BOpts.scales.x,title:{display:true,text:xlabel,color:TC,font:{family:'Inter',size:16,weight:'700'}}},y:{...BOpts.scales.y,title:{display:true,text:'Частота (%)',color:TC,font:{family:'Inter',size:16,weight:'700'}}}}}});
 }
 
 function ciChart(sD,kD){
@@ -590,7 +590,7 @@ function crChart(sCR,kWC){
   CH['chart-completion-rate']=new Chart(document.getElementById('chart-completion-rate').getContext('2d'),{type:'bar',
     data:{labels:['Среднее','−1σ','+1σ','P10','P90'],
       datasets:[{label:'Scrum: %завершения',data:[sm,sm-ss,sm+ss,pct(sCR,10),pct(sCR,90)].map(fmt),backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban: WIP-соблюд.',data:[km,km-ks,km+ks,pct(kWC,10),pct(kWC,90)].map(fmt),backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
-    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,max:110,title:{display:true,text:'%',color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,max:110,title:{display:true,text:'%',color:TC,font:{family:'Inter',size:16,weight:'700'}}}}}});
 }
 
 function metricsTable(s,k){
@@ -631,7 +631,33 @@ function renderRecs(s,k,p){
   const kw=[mean(k.ct)<mean(s.ct),kp>sp,mean(k.tp)>mean(s.tp)].filter(Boolean).length;
   const win=sw>kw?'Scrum':kw>sw?'Kanban':'Равнозначны';
   const wc=win==='Scrum'?'var(--scrum)':win==='Kanban'?'var(--kanban)':'var(--muted)';
-  document.getElementById('verdict-text').innerHTML=`По результатам <strong>${p.iters.toLocaleString()}</strong> итераций Монте-Карло:<br><br><strong style="color:${wc};font-size:15px;">→ Рекомендуется: ${win}</strong><br><br>Scrum: cycle time = <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дн.</strong>, throughput = <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} зад/ит.</strong>, предсказуемость = <strong style="color:var(--scrum)">${sp.toFixed(2)}</strong><br>Kanban: cycle time = <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дн.</strong>, throughput = <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} зад/ит.</strong>, предсказуемость = <strong style="color:var(--kanban)">${kp.toFixed(2)}</strong><br><br><span style="color:var(--muted);font-size:13px;">σ=${p.sig.toFixed(2)} | Команда: ${p.team} чел. | Спринт: ${p.spd} дн. | WIP: ${p.wip} | Поток: ${p.flow.toFixed(1)} зад/день</span>`;
+  const d_ct_pct = ((mean(k.ct)-mean(s.ct))/mean(s.ct)*100).toFixed(1);
+  const d_tp_pct = ((mean(k.tp)-mean(s.tp))/mean(s.tp)*100).toFixed(1);
+  document.getElementById('verdict-text').innerHTML=`
+<div style="font-size:22px;font-weight:800;font-family:'Montserrat',sans-serif;color:${wc};margin-bottom:14px;padding:12px 18px;background:${win==='Scrum'?'#e0f2fe':win==='Kanban'?'#ffedd5':'#f1f5f9'};border-radius:8px;">
+  Рекомендуемая методология: ${win}
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+  <div style="background:#f0f9ff;border:2px solid #bae6fd;border-radius:8px;padding:14px;">
+    <div style="font-size:14px;font-weight:700;color:var(--scrum);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Scrum</div>
+    <div style="font-size:16px;margin-bottom:6px;">Cycle Time: <strong style="color:var(--scrum)">${mean(s.ct).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Throughput: <strong style="color:var(--scrum)">${mean(s.tp).toFixed(1)} зад/ит.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Lead Time: <strong style="color:var(--scrum)">${mean(s.lt).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--scrum)">${sp.toFixed(2)}</strong></div>
+  </div>
+  <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:8px;padding:14px;">
+    <div style="font-size:14px;font-weight:700;color:var(--kanban);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Kanban</div>
+    <div style="font-size:16px;margin-bottom:6px;">Cycle Time: <strong style="color:var(--kanban)">${mean(k.ct).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Throughput: <strong style="color:var(--kanban)">${mean(k.tp).toFixed(1)} зад/ит.</strong></div>
+    <div style="font-size:16px;margin-bottom:6px;">Lead Time: <strong style="color:var(--kanban)">${mean(k.lt).toFixed(2)} дн.</strong></div>
+    <div style="font-size:16px;">Предсказуемость: <strong style="color:var(--kanban)">${kp.toFixed(2)}</strong></div>
+  </div>
+</div>
+<div style="font-size:15px;line-height:1.8;color:#334155;background:#f8fafc;border-radius:8px;padding:14px;border:1px solid #e2e8f0;">
+  <strong>Итог по метрикам:</strong> Цикловое время у Kanban ${d_ct_pct > 0 ? 'выше' : 'ниже'} на ${Math.abs(d_ct_pct)}%, пропускная способность ${d_tp_pct > 0 ? 'выше' : 'ниже'} на ${Math.abs(d_tp_pct)}% относительно Scrum.<br>
+  Голосование по метрикам: Scrum побеждает по <strong>${sw}</strong> из 3, Kanban — по <strong>${kw}</strong> из 3.<br>
+  <span style="color:var(--muted);">Параметры: σ=${p.sig.toFixed(2)} | Команда ${p.team} чел. | Спринт ${p.spd} дн. | WIP ${p.wip} | Поток ${p.flow.toFixed(1)} зад/день | N=${p.iters.toLocaleString()} итераций</span>
+</div>`;
 }
 
 function renderKPIs(s,k){
@@ -657,14 +683,21 @@ async function runSimulation(){
   const pl=document.getElementById('progress-label');
   btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
   const p=getP();
-  const steps=[[10,'Инициализация параметров...'],[30,`Симуляция Scrum (${p.iters.toLocaleString()} ит.)...`],[60,`Симуляция Kanban (${p.iters.toLocaleString()} ит.)...`],[80,'Вычисление статистик...'],[95,'Построение графиков...'],[100,'Готово!']];
   let scrum,kanban;
-  for(let i=0;i<steps.length;i++){
-    pb.style.width=steps[i][0]+'%';pb.textContent=steps[i][0]+'%';pl.textContent=steps[i][1];
-    await new Promise(r=>setTimeout(r,150));
-    if(i===1) scrum=simScrum(p);
-    if(i===2) kanban=simKanban(p);
-    if(i===4){
+  // Animated progress for browser-side simulation
+  async function animPct(from, to, label, ms) {
+    for(let v=from;v<=to;v++){
+      pb.style.width=v+'%';pb.textContent=v+'%';pl.textContent=label+' '+v+'%';
+      await new Promise(r=>setTimeout(r,ms));
+    }
+  }
+  await animPct(0,10,'Инициализация...',20);
+  scrum=simScrum(p);
+  await animPct(11,50,'Симуляция Scrum...',8);
+  kanban=simKanban(p);
+  await animPct(51,80,'Симуляция Kanban...',8);
+  await animPct(81,94,'Вычисление статистик...',15);
+  {const i=4;
       renderKPIs(scrum,kanban);
       ['results','dist','table'].forEach(x=>{document.getElementById(x+'-placeholder').style.display='none';document.getElementById(x+'-content').style.display='block';});
       document.getElementById('recs-placeholder').style.display='none';document.getElementById('recs-content').style.display='block';
@@ -682,9 +715,11 @@ async function runSimulation(){
       renderRecs(scrum,kanban,p);
       updateMiniConclusions(scrum, kanban);
       saveHistory(p, scrum, kanban);
-    }
+      simulationHasRun=true;
   }
-  btn.disabled=false;btn.textContent='▶ ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
+  await animPct(95,100,'Готово!',20);
+  pl.textContent='Симуляция завершена успешно.';
+  btn.disabled=false;btn.textContent='ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
 }
 
 // === TABS ===
@@ -762,22 +797,22 @@ function updateMiniConclusions(s, k) {
   const d_tp = mean(k.tp) - mean(s.tp);
   const d_ct = mean(k.ct) - mean(s.ct);
   const el = id => { const e=document.getElementById(id); if(e) return e; return {innerHTML:''}; };
-  el('mc-tp').innerHTML = `📊 В среднем <strong>${d_tp > 0 ? 'Kanban' : 'Scrum'}</strong> показывает бо́льшую пропускную способность на <strong>${Math.abs(d_tp).toFixed(1)} зад/ит</strong>.`;
-  el('mc-cyc').innerHTML = `⏱ Задачи доставляются быстрее в <strong>${d_ct < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_ct).toFixed(1)} дн</strong>).`;
+  el('mc-tp').innerHTML = `В среднем <strong>${d_tp > 0 ? 'Kanban' : 'Scrum'}</strong> показывает бо́льшую пропускную способность на <strong>${Math.abs(d_tp).toFixed(1)} зад/ит</strong>.`;
+  el('mc-cyc').innerHTML = `Задачи доставляются быстрее в <strong>${d_ct < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_ct).toFixed(1)} дн</strong>).`;
   const d_lt = mean(k.lt) - mean(s.lt);
-  el('mc-lt').innerHTML = `🔁 Lead time лучше у <strong>${d_lt < 0 ? 'Kanban' : 'Scrum'}</strong> на <strong>${Math.abs(d_lt).toFixed(1)} дн</strong>.`;
+  el('mc-lt').innerHTML = `Lead time лучше у <strong>${d_lt < 0 ? 'Kanban' : 'Scrum'}</strong> на <strong>${Math.abs(d_lt).toFixed(1)} дн</strong>.`;
   const d_td = mean(k.td) - mean(s.td);
-  el('mc-td').innerHTML = `🏁 Проект завершится быстрее при <strong>${d_td < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_td).toFixed(1)} дн</strong>).`;
-  el('md-cyc').innerHTML = `📉 Разброс цикловых времён: Kanban σ=<strong>${std(k.ct).toFixed(2)}</strong> vs Scrum σ=<strong>${std(s.ct).toFixed(2)}</strong> — Kanban <strong>${std(k.ct) < std(s.ct) ? 'стабильнее' : 'менее стабилен'}</strong>.`;
-  el('md-tp').innerHTML = `📈 Стабильность потока: CoV Scrum=<strong>${(std(s.tp)/mean(s.tp)).toFixed(2)}</strong>, Kanban=<strong>${(std(k.tp)/mean(k.tp)).toFixed(2)}</strong>. ${(std(k.tp)/mean(k.tp)) < (std(s.tp)/mean(s.tp)) ? 'Kanban равномернее.' : 'Scrum равномернее.'}`;
+  el('mc-td').innerHTML = `Проект завершится быстрее при <strong>${d_td < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_td).toFixed(1)} дн</strong>).`;
+  el('md-cyc').innerHTML = `Разброс цикловых времён: Kanban σ=<strong>${std(k.ct).toFixed(2)}</strong> vs Scrum σ=<strong>${std(s.ct).toFixed(2)}</strong> — Kanban <strong>${std(k.ct) < std(s.ct) ? 'стабильнее' : 'менее стабилен'}</strong>.`;
+  el('md-tp').innerHTML = `Стабильность потока: CoV Scrum=<strong>${(std(s.tp)/mean(s.tp)).toFixed(2)}</strong>, Kanban=<strong>${(std(k.tp)/mean(k.tp)).toFixed(2)}</strong>. ${(std(k.tp)/mean(k.tp)) < (std(s.tp)/mean(s.tp)) ? 'Kanban равномернее.' : 'Scrum равномернее.'}`;
   const sCTp10=pct(s.ct,10),kCTp10=pct(k.ct,10),sCTp90=pct(s.ct,90),kCTp90=pct(k.ct,90);
-  el('md-ci').innerHTML = `📐 Диапазон P10–P90: Scrum <strong>${sCTp10.toFixed(1)}–${sCTp90.toFixed(1)} дн</strong>, Kanban <strong>${kCTp10.toFixed(1)}–${kCTp90.toFixed(1)} дн</strong>. ${(sCTp90-sCTp10) < (kCTp90-kCTp10) ? 'Scrum предсказуемее.' : 'Kanban предсказуемее.'}`;
+  el('md-ci').innerHTML = `Диапазон P10–P90: Scrum <strong>${sCTp10.toFixed(1)}–${sCTp90.toFixed(1)} дн</strong>, Kanban <strong>${kCTp10.toFixed(1)}–${kCTp90.toFixed(1)} дн</strong>. ${(sCTp90-sCTp10) < (kCTp90-kCTp10) ? 'Scrum предсказуемее.' : 'Kanban предсказуемее.'}`;
   const sCR=mean(s.cr),kWC=mean(k.wc);
-  el('md-cr').innerHTML = `✅ Scrum завершает в среднем <strong>${(sCR*100).toFixed(0)}%</strong> задач спринта. Kanban соблюдает WIP-лимиты в <strong>${(kWC*100).toFixed(0)}%</strong> случаев.`;
+  el('md-cr').innerHTML = `Scrum завершает в среднем <strong>${(sCR*100).toFixed(0)}%</strong> задач спринта. Kanban соблюдает WIP-лимиты в <strong>${(kWC*100).toFixed(0)}%</strong> случаев.`;
   const sv=[mean(s.tp),1-mean(s.ct)/10,1-mean(s.lt)/15,1-mean(s.def),mean(s.cr),1/(std(s.tp)/mean(s.tp)+0.01)/20];
   const kv=[mean(k.tp),1-mean(k.ct)/10,1-mean(k.lt)/15,1-mean(k.def),mean(k.wc),1/(std(k.tp)/mean(k.tp)+0.01)/20];
   const sScore=sv.reduce((a,b)=>a+b,0), kScore=kv.reduce((a,b)=>a+b,0);
-  el('md-radar').innerHTML = `🎯 Интегральный балл: Scrum <strong>${sScore.toFixed(2)}</strong> vs Kanban <strong>${kScore.toFixed(2)}</strong> — общее преимущество у <strong>${sScore > kScore ? 'Scrum' : 'Kanban'}</strong>.`;
+  el('md-radar').innerHTML = `Интегральный балл: Scrum <strong>${sScore.toFixed(2)}</strong> vs Kanban <strong>${kScore.toFixed(2)}</strong> — общее преимущество у <strong>${sScore > kScore ? 'Scrum' : 'Kanban'}</strong>.`;
 }
 
 function hideResults() {
