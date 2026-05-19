@@ -36,12 +36,12 @@ function getP(){
 
 // === CHARTS ===
 const CH={};
-const SC='#0284c7',KC='#ea580c',SD='rgba(2,132,199,0.13)',KD='rgba(234,88,12,0.13)',GR='#e2e8f0',TC='#64748b';
+const SC='#0284c7',KC='#ea580c',SD='rgba(2,132,199,0.18)',KD='rgba(234,88,12,0.18)',GR='#cbd5e1',TC='#1e293b';
 const BOpts={responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{labels:{color:TC,font:{family:'JetBrains Mono',size:13},boxWidth:10}},
-    tooltip:{backgroundColor:'#ffffff',borderColor:'#e2e8f0',borderWidth:1,titleColor:'#e8e8f0',bodyColor:TC,titleFont:{family:'JetBrains Mono',size:14},bodyFont:{family:'JetBrains Mono',size:13}}},
-  scales:{x:{grid:{color:GR},ticks:{color:TC,font:{family:'JetBrains Mono',size:13}}},
-    y:{grid:{color:GR},ticks:{color:TC,font:{family:'JetBrains Mono',size:13}}}}};
+  plugins:{legend:{labels:{color:TC,font:{family:'Inter',size:15,weight:'600'},boxWidth:14,padding:16}},
+    tooltip:{backgroundColor:'#ffffff',borderColor:'#94a3b8',borderWidth:2,titleColor:'#0f172a',bodyColor:'#334155',titleFont:{family:'Inter',size:15,weight:'700'},bodyFont:{family:'Inter',size:14},padding:10,cornerRadius:8,displayColors:true}},
+  scales:{x:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:14,weight:'500'}}},
+    y:{grid:{color:GR},ticks:{color:TC,font:{family:'Inter',size:14,weight:'500'}}}}};
 
 function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
 
@@ -52,7 +52,7 @@ function barChart(id,sD,kD,yLabel){
   const kv=[pct(kD,10),pct(kD,25),pct(kD,50),mean(kD),pct(kD,75),pct(kD,90)];
   CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'bar',
     data:{labels:labs,datasets:[{label:'Scrum',data:sv,backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban',data:kv,backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
-    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,title:{display:true,text:yLabel,color:TC,font:{family:'JetBrains Mono',size:13}}}}}});
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,title:{display:true,text:yLabel,color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
 }
 
 function radarChart(s,k){
@@ -65,7 +65,7 @@ function radarChart(s,k){
   CH['chart-radar']=new Chart(document.getElementById('chart-radar').getContext('2d'),{type:'radar',
     data:{labels:['Пропускная\nспособность','Цикловое\nвремя ↓','Lead Time ↓','Качество ↓','Завершение\nспринта/WIP','Предсказуе\nмость'],
       datasets:[{label:'Scrum',data:sv,backgroundColor:'rgba(0,212,255,0.1)',borderColor:SC,borderWidth:2,pointBackgroundColor:SC},{label:'Kanban',data:kv,backgroundColor:'rgba(255,107,53,0.1)',borderColor:KC,borderWidth:2,pointBackgroundColor:KC}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:GR},ticks:{color:TC,backdropColor:'transparent',font:{family:'JetBrains Mono',size:12}},pointLabels:{color:TC,font:{family:'JetBrains Mono',size:13}}}},plugins:{...BOpts.plugins}}});
+    options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:GR},ticks:{color:TC,backdropColor:'transparent',font:{family:'Inter',size:13,weight:'500'}},pointLabels:{color:TC,font:{family:'Inter',size:14,weight:'500'}}}},plugins:{...BOpts.plugins}}});
 }
 
 function distChart(id,sD,kD,bins,xlabel){
@@ -75,7 +75,7 @@ function distChart(id,sD,kD,bins,xlabel){
   function bld(d){const c=new Array(bins).fill(0);d.forEach(v=>{const b=clamp(Math.floor((v-mn)/step),0,bins-1);c[b]++;});return c.map(x=>x/d.length*100);}
   CH[id]=new Chart(document.getElementById(id).getContext('2d'),{type:'line',
     data:{labels:labs,datasets:[{label:'Scrum',data:bld(sD),backgroundColor:SD,borderColor:SC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0},{label:'Kanban',data:bld(kD),backgroundColor:KD,borderColor:KC,borderWidth:1.5,fill:true,tension:0.4,pointRadius:0}]},
-    options:{...BOpts,scales:{x:{...BOpts.scales.x,title:{display:true,text:xlabel,color:TC,font:{family:'JetBrains Mono',size:13}}},y:{...BOpts.scales.y,title:{display:true,text:'Частота (%)',color:TC,font:{family:'JetBrains Mono',size:13}}}}}});
+    options:{...BOpts,scales:{x:{...BOpts.scales.x,title:{display:true,text:xlabel,color:TC,font:{family:'Inter',size:14,weight:'500'}}},y:{...BOpts.scales.y,title:{display:true,text:'Частота (%)',color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
 }
 
 function ciChart(sD,kD){
@@ -95,7 +95,7 @@ function crChart(sCR,kWC){
   CH['chart-completion-rate']=new Chart(document.getElementById('chart-completion-rate').getContext('2d'),{type:'bar',
     data:{labels:['Среднее','−1σ','+1σ','P10','P90'],
       datasets:[{label:'Scrum: %завершения',data:[sm,sm-ss,sm+ss,pct(sCR,10),pct(sCR,90)].map(fmt),backgroundColor:SD,borderColor:SC,borderWidth:1.5,borderRadius:4},{label:'Kanban: WIP-соблюд.',data:[km,km-ks,km+ks,pct(kWC,10),pct(kWC,90)].map(fmt),backgroundColor:KD,borderColor:KC,borderWidth:1.5,borderRadius:4}]},
-    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,max:110,title:{display:true,text:'%',color:TC,font:{family:'JetBrains Mono',size:13}}}}}});
+    options:{...BOpts,scales:{...BOpts.scales,y:{...BOpts.scales.y,max:110,title:{display:true,text:'%',color:TC,font:{family:'Inter',size:14,weight:'500'}}}}}});
 }
 
 function metricsTable(s,k){
@@ -162,10 +162,10 @@ async function runSimulation(){
   const pl=document.getElementById('progress-label');
   btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
   const p=getP();
-  pb.style.width='10%';pl.textContent='Подключение к API...';
+  pb.style.width='10%';pl.textContent='10% — Подключение к API...';
   try{
     const body={...p,iters:+p.iters,vel:+p.vel,dur:+p.dur,team:+p.team,spd:+p.spd,wip:+p.wip};
-    pb.style.width='30%';pl.textContent='Счёт Монте-Карло на сервере...';
+    pb.style.width='30%';pl.textContent='30% — Счёт Монте-Карло на сервере...';
     const res=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!res.ok){
       let msg=res.statusText;
@@ -173,11 +173,12 @@ async function runSimulation(){
       throw new Error(msg);
     }
     const data=await res.json();
-    pb.style.width='95%';pl.textContent='Построение графиков...';
+    pb.style.width='95%';pl.textContent='95% — Построение графиков...';
     applyPythonExport(data);
+    simulationHasRun = true;
     const badge=document.getElementById('badge-mc');
     if(badge&&data.params) badge.textContent='Монте-Карло N='+Number(data.params.iters).toLocaleString();
-    pb.style.width='100%';pl.textContent='Готово!';
+    pb.style.width='100%';pl.textContent='100% — Готово!';
   }catch(e){
     pl.textContent='Ошибка: '+e.message;
     alert('Ошибка: '+e.message);
@@ -214,7 +215,7 @@ function saveHistory(p, s, k) {
     win: mean(s.ct) < mean(k.ct) ? 'Scrum' : 'Kanban'
   });
   const t = document.getElementById('history-tbody');
-  if(t) t.innerHTML = runHistory.map((h,i) => `<tr style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" onclick="restoreHistory(${i})" title="Нажмите, чтобы загрузить этот прогон"><td>#${i+1} (${h.time})</td><td>σ=${h.p.sig.toFixed(2)}, team=${h.p.team}, wip=${h.p.wip}</td><td><strong>${h.s_ct.toFixed(1)} дн.</strong></td><td><strong>${h.k_ct.toFixed(1)} дн.</strong></td><td style="color:${h.win==='Scrum'?'var(--scrum)':'var(--kanban)'; font-weight: bold;}">${h.win}</td></tr>`).reverse().join('');
+  if(t) t.innerHTML = runHistory.map((h,i) => `<tr style="cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='transparent'" onclick="restoreHistory(${i})" title="Нажмите, чтобы загрузить этот прогон"><td>#${i+1} (${h.time})</td><td>σ=${h.p.sig.toFixed(2)}, team=${h.p.team}, wip=${h.p.wip}</td><td><strong>${h.s_ct.toFixed(1)} дн.</strong></td><td><strong>${h.k_ct.toFixed(1)} дн.</strong></td><td style="color:${h.win==='Scrum'?'var(--scrum)':'var(--kanban)'}; font-weight: bold;">${h.win}</td></tr>`).reverse().join('');
 }
 
 function restoreHistory(idx) {
@@ -259,15 +260,23 @@ function restoreHistory(idx) {
 function updateMiniConclusions(s, k) {
   const d_tp = mean(k.tp) - mean(s.tp);
   const d_ct = mean(k.ct) - mean(s.ct);
-  const el = id => { const e=document.getElementById(id); if(e) return e; return {textContent:''}; };
-  el('mc-tp').innerHTML = `В среднем <strong>${d_tp > 0 ? 'Kanban' : 'Scrum'}</strong> показывает бóльшую пропускную способность на <strong>${Math.abs(d_tp).toFixed(1)} зад/ит</strong>.`;
-  el('mc-cyc').innerHTML = `Задачи доставляются быстрее в <strong>${d_ct < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_ct).toFixed(1)} дн</strong>).`;
+  const el = id => { const e=document.getElementById(id); if(e) return e; return {innerHTML:''}; };
+  el('mc-tp').innerHTML = `📊 В среднем <strong>${d_tp > 0 ? 'Kanban' : 'Scrum'}</strong> показывает бо́льшую пропускную способность на <strong>${Math.abs(d_tp).toFixed(1)} зад/ит</strong>.`;
+  el('mc-cyc').innerHTML = `⏱ Задачи доставляются быстрее в <strong>${d_ct < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_ct).toFixed(1)} дн</strong>).`;
   const d_lt = mean(k.lt) - mean(s.lt);
-  el('mc-lt').innerHTML = `Lead time лучше у <strong>${d_lt < 0 ? 'Kanban' : 'Scrum'}</strong> на <strong>${Math.abs(d_lt).toFixed(1)} дн</strong>.`;
+  el('mc-lt').innerHTML = `🔁 Lead time лучше у <strong>${d_lt < 0 ? 'Kanban' : 'Scrum'}</strong> на <strong>${Math.abs(d_lt).toFixed(1)} дн</strong>.`;
   const d_td = mean(k.td) - mean(s.td);
-  el('mc-td').innerHTML = `Проект завершится быстрее при <strong>${d_td < 0 ? 'Kanban' : 'Scrum'}</strong>.`;
-  el('md-cyc').innerHTML = `Распределение Kanban <strong>${std(k.ct) < std(s.ct) ? 'имеет меньший разброс' : 'имеет более длинный хвост'}</strong> по сравнению со Scrum.`;
-  el('md-tp').innerHTML = `Стабильность потока: CoV Scrum=<strong>${(std(s.tp)/mean(s.tp)).toFixed(2)}</strong>, Kanban=<strong>${(std(k.tp)/mean(k.tp)).toFixed(2)}</strong>.`;
+  el('mc-td').innerHTML = `🏁 Проект завершится быстрее при <strong>${d_td < 0 ? 'Kanban' : 'Scrum'}</strong> (разница <strong>${Math.abs(d_td).toFixed(1)} дн</strong>).`;
+  el('md-cyc').innerHTML = `📉 Разброс цикловых времён: Kanban σ=<strong>${std(k.ct).toFixed(2)}</strong> vs Scrum σ=<strong>${std(s.ct).toFixed(2)}</strong> — Kanban <strong>${std(k.ct) < std(s.ct) ? 'стабильнее' : 'менее стабилен'}</strong>.`;
+  el('md-tp').innerHTML = `📈 Стабильность потока: CoV Scrum=<strong>${(std(s.tp)/mean(s.tp)).toFixed(2)}</strong>, Kanban=<strong>${(std(k.tp)/mean(k.tp)).toFixed(2)}</strong>. ${(std(k.tp)/mean(k.tp)) < (std(s.tp)/mean(s.tp)) ? 'Kanban равномернее.' : 'Scrum равномернее.'}`;
+  const sCTp10=pct(s.ct,10),kCTp10=pct(k.ct,10),sCTp90=pct(s.ct,90),kCTp90=pct(k.ct,90);
+  el('md-ci').innerHTML = `📐 Диапазон P10–P90: Scrum <strong>${sCTp10.toFixed(1)}–${sCTp90.toFixed(1)} дн</strong>, Kanban <strong>${kCTp10.toFixed(1)}–${kCTp90.toFixed(1)} дн</strong>. ${(sCTp90-sCTp10) < (kCTp90-kCTp10) ? 'Scrum предсказуемее.' : 'Kanban предсказуемее.'}`;
+  const sCR=mean(s.cr),kWC=mean(k.wc);
+  el('md-cr').innerHTML = `✅ Scrum завершает в среднем <strong>${(sCR*100).toFixed(0)}%</strong> задач спринта. Kanban соблюдает WIP-лимиты в <strong>${(kWC*100).toFixed(0)}%</strong> случаев.`;
+  const sv=[mean(s.tp),1-mean(s.ct)/10,1-mean(s.lt)/15,1-mean(s.def),mean(s.cr),1/(std(s.tp)/mean(s.tp)+0.01)/20];
+  const kv=[mean(k.tp),1-mean(k.ct)/10,1-mean(k.lt)/15,1-mean(k.def),mean(k.wc),1/(std(k.tp)/mean(k.tp)+0.01)/20];
+  const sScore=sv.reduce((a,b)=>a+b,0), kScore=kv.reduce((a,b)=>a+b,0);
+  el('md-radar').innerHTML = `🎯 Интегральный балл: Scrum <strong>${sScore.toFixed(2)}</strong> vs Kanban <strong>${kScore.toFixed(2)}</strong> — общее преимущество у <strong>${sScore > kScore ? 'Scrum' : 'Kanban'}</strong>.`;
 }
 
 function hideResults() {
@@ -284,17 +293,28 @@ const SC_DATA={
   enterprise:{dur:20,team:10,unc:20,spd:14,vel:65,ovh:22,wip:6,cyc:45,flow:18,desc:'<strong>Энтерпрайз:</strong> Крупный проект, большая команда, жёсткие процессы, overhead 22%. Apache JIRA корпоративных проектов.'},
   maintenance:{dur:24,team:3,unc:40,spd:14,vel:20,ovh:8,wip:2,cyc:15,flow:45,desc:'<strong>Поддержка/обслуживание:</strong> Непрерывный поток багфиксов и hotfix. Поток 4.5 зад/день. Идеальный сценарий для Kanban.'}
 };
-function loadScenario(k,btn){
-  const ans = confirm("Применить параметры нового сценария?\n\nОК - Сбросить на параметры сценария\nОтмена - Сохранить введённые вами данные");
-  if(ans){
-    const s=SC_DATA[k];
-    const map={dur:'duration',team:'team',unc:'uncertainty',spd:'sprint',vel:'velocity',ovh:'overhead',wip:'wip',cyc:'cycle',flow:'flow'};
-    Object.entries(map).forEach(([sk,id])=>{document.getElementById('sl-'+id).value=s[sk];updateLabel(id);});
-    document.getElementById('scenario-desc').innerHTML=s.desc;
-  }
+let _pendingScenarioKey = null, _pendingScenarioBtn = null;
+function loadScenario(k, btn) {
+  _pendingScenarioKey = k;
+  _pendingScenarioBtn = btn;
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+document.getElementById('modal-yes').onclick = function() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+  const k = _pendingScenarioKey, btn = _pendingScenarioBtn;
+  const s = SC_DATA[k];
+  const map={dur:'duration',team:'team',unc:'uncertainty',spd:'sprint',vel:'velocity',ovh:'overhead',wip:'wip',cyc:'cycle',flow:'flow'};
+  Object.entries(map).forEach(([sk,id])=>{document.getElementById('sl-'+id).value=s[sk];updateLabel(id);});
+  document.getElementById('scenario-desc').innerHTML=s.desc;
   document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   hideResults();
-}
+};
+document.getElementById('modal-no').onclick = function() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+  const btn = _pendingScenarioBtn;
+  document.querySelectorAll('.scenario-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  hideResults();
+};
 
 ['duration','team','uncertainty','sprint','velocity','overhead','wip','cycle','flow'].forEach(updateLabel);
 
