@@ -123,10 +123,10 @@ async function runSimulation(){
   const pl=document.getElementById('progress-label');
   btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
   const p=getP();
-  pb.style.width='10%';pl.textContent='Подключение к API...';
+  pb.style.width='10%';pl.textContent='10% — Подключение к API...';
   try{
     const body={...p,iters:+p.iters,vel:+p.vel,dur:+p.dur,team:+p.team,spd:+p.spd,wip:+p.wip};
-    pb.style.width='30%';pl.textContent='Счёт Монте-Карло на сервере...';
+    pb.style.width='30%';pl.textContent='30% — Счёт Монте-Карло на сервере...';
     const res=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!res.ok){
       let msg=res.statusText;
@@ -134,11 +134,12 @@ async function runSimulation(){
       throw new Error(msg);
     }
     const data=await res.json();
-    pb.style.width='95%';pl.textContent='Построение графиков...';
+    pb.style.width='95%';pl.textContent='95% — Построение графиков...';
     applyPythonExport(data);
+    simulationHasRun = true;
     const badge=document.getElementById('badge-mc');
     if(badge&&data.params) badge.textContent='Монте-Карло N='+Number(data.params.iters).toLocaleString();
-    pb.style.width='100%';pl.textContent='Готово!';
+    pb.style.width='100%';pl.textContent='100% — Готово!';
   }catch(e){
     pl.textContent='Ошибка: '+e.message;
     alert('Ошибка: '+e.message);

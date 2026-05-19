@@ -46,9 +46,9 @@
   header p { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 700px; }
   .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .badge { padding: 3px 10px; border-radius: 4px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
-  .badge-scrum { background: var(--scrum-dim); color: var(--scrum); border: 1px solid rgba(0,212,255,0.25); }
-  .badge-kanban { background: var(--kanban-dim); color: var(--kanban); border: 1px solid rgba(255,107,53,0.25); }
-  .badge-mc { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .badge-scrum { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .badge-kanban { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .badge-mc { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
   .tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid var(--border); overflow-x: auto; }
   .tab { padding: 9px 16px; background: none; border: none; cursor: pointer; color: var(--muted); font-family: inherit; font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; letter-spacing: 0.04em; white-space: nowrap; }
   .tab.active { color: var(--text); border-bottom-color: var(--accent); }
@@ -579,10 +579,10 @@ async function runSimulation(){
   const pl=document.getElementById('progress-label');
   btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
   const p=getP();
-  pb.style.width='10%';pl.textContent='Подключение к API...';
+  pb.style.width='10%';pl.textContent='10% — Подключение к API...';
   try{
     const body={...p,iters:+p.iters,vel:+p.vel,dur:+p.dur,team:+p.team,spd:+p.spd,wip:+p.wip};
-    pb.style.width='30%';pl.textContent='Счёт Монте-Карло на сервере...';
+    pb.style.width='30%';pl.textContent='30% — Счёт Монте-Карло на сервере...';
     const res=await fetch('/api/simulate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     if(!res.ok){
       let msg=res.statusText;
@@ -590,11 +590,12 @@ async function runSimulation(){
       throw new Error(msg);
     }
     const data=await res.json();
-    pb.style.width='95%';pl.textContent='Построение графиков...';
+    pb.style.width='95%';pl.textContent='95% — Построение графиков...';
     applyPythonExport(data);
+    simulationHasRun = true;
     const badge=document.getElementById('badge-mc');
     if(badge&&data.params) badge.textContent='Монте-Карло N='+Number(data.params.iters).toLocaleString();
-    pb.style.width='100%';pl.textContent='Готово!';
+    pb.style.width='100%';pl.textContent='100% — Готово!';
   }catch(e){
     pl.textContent='Ошибка: '+e.message;
     alert('Ошибка: '+e.message);
