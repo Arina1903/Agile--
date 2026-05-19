@@ -159,9 +159,19 @@ function renderRecs(s,k,p){
   </div>
 </div>
 <div style="font-size:15px;line-height:1.8;color:#334155;background:#f8fafc;border-radius:8px;padding:14px;border:1px solid #e2e8f0;">
-  <strong>Итог по метрикам:</strong> Цикловое время у Kanban ${d_ct_pct > 0 ? 'выше' : 'ниже'} на ${Math.abs(d_ct_pct)}%, пропускная способность ${d_tp_pct > 0 ? 'выше' : 'ниже'} на ${Math.abs(d_tp_pct)}% относительно Scrum.<br>
-  Голосование по метрикам: Scrum побеждает по <strong>${sw}</strong> из 3, Kanban — по <strong>${kw}</strong> из 3.<br>
-  <span style="color:var(--muted);">Параметры: σ=${p.sig.toFixed(2)} | Команда ${p.team} чел. | Спринт ${p.spd} дн. | WIP ${p.wip} | Поток ${p.flow.toFixed(1)} зад/день | N=${p.iters.toLocaleString()} итераций</span>
+  <strong>Итог по метрикам:</strong><br>
+  Цикловое время у Kanban ${d_ct_pct > 0 ? 'выше' : 'ниже'} на <strong>${Math.abs(d_ct_pct)}%</strong> относительно Scrum.<br>
+  Пропускная способность у Kanban ${d_tp_pct > 0 ? 'выше' : 'ниже'} на <strong>${Math.abs(d_tp_pct)}%</strong> относительно Scrum.<br><br>
+  Голосование по трём ключевым метрикам: Scrum побеждает по <strong>${sw}</strong> из 3 показателей, Kanban — по <strong>${kw}</strong> из 3 показателей.<br><br>
+  <span style="color:var(--muted);">
+    Параметры запуска:<br>
+    &nbsp;&nbsp;— Коэффициент неопределённости: <strong>${p.sig.toFixed(2)}</strong><br>
+    &nbsp;&nbsp;— Размер команды: <strong>${p.team} человек</strong><br>
+    &nbsp;&nbsp;— Длительность спринта: <strong>${p.spd} дней</strong><br>
+    &nbsp;&nbsp;— WIP-лимит (Kanban): <strong>${p.wip} задачи</strong><br>
+    &nbsp;&nbsp;— Интенсивность потока: <strong>${p.flow.toFixed(1)} задач в день</strong><br>
+    &nbsp;&nbsp;— Количество итераций Монте-Карло: <strong>${p.iters.toLocaleString()}</strong>
+  </span>
 </div>`;
 }
 
@@ -251,10 +261,6 @@ async function runSimulation(){
 
 // === TABS ===
 function switchTab(n){
-  if (n !== 'simulation' && !simulationHasRun) {
-    alert('Пожалуйста, сначала запустите симуляцию (нажмите кнопку "ЗАПУСТИТЬ СИМУЛЯЦИЮ"), чтобы увидеть результаты.');
-    return;
-  }
   const ns=['simulation','results','distributions','table','recs','history'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ns[i]===n));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
