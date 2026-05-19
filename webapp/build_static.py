@@ -115,42 +115,6 @@ function getP(){
         raise SystemExit("Шаблон web/monte_carlo_agile.html изменён: блок SIMULATION не найден.")
     text = text.replace(old_sim, new_sim)
 
-    old_run = """// === MAIN RUN ===
-async function runSimulation(){
-  const btn=document.getElementById('btn-run');
-  const pw=document.getElementById('progress-wrap');
-  const pb=document.getElementById('progress-bar');
-  const pl=document.getElementById('progress-label');
-  btn.disabled=true;btn.textContent='⏳ СИМУЛЯЦИЯ...';pw.classList.add('visible');
-  const p=getP();
-  const steps=[[10,'Инициализация параметров...'],[30,`Симуляция Scrum (${p.iters.toLocaleString()} ит.)...`],[60,`Симуляция Kanban (${p.iters.toLocaleString()} ит.)...`],[80,'Вычисление статистик...'],[95,'Построение графиков...'],[100,'Готово!']];
-  let scrum,kanban;
-  for(let i=0;i<steps.length;i++){
-    pb.style.width=steps[i][0]+'%';pl.textContent=steps[i][1];
-    await new Promise(r=>setTimeout(r,150));
-    if(i===1) scrum=simScrum(p);
-    if(i===2) kanban=simKanban(p);
-    if(i===4){
-      renderKPIs(scrum,kanban);
-      ['results','dist','table'].forEach(x=>{document.getElementById(x+'-placeholder').style.display='none';document.getElementById(x+'-content').style.display='block';});
-      document.getElementById('recs-placeholder').style.display='none';document.getElementById('recs-content').style.display='block';
-      barChart('chart-throughput',scrum.tp,kanban.tp,'Задач/итерацию');
-      barChart('chart-cycle',scrum.ct,kanban.ct,'Дней');
-      barChart('chart-lead',scrum.lt,kanban.lt,'Дней');
-      barChart('chart-completion',scrum.td,kanban.td,'Дней');
-      radarChart(scrum,kanban);
-      distChart('chart-dist-cycle',scrum.ct,kanban.ct,30,'Цикловое время (дни)');
-      distChart('chart-dist-tp',scrum.tp,kanban.tp,30,'Пропускная способность (зад/ит.)');
-      ciChart(scrum.ct,kanban.ct);
-      crChart(scrum.cr,kanban.wc);
-      metricsTable(scrum,kanban);
-      sigTable(scrum,kanban);
-      renderRecs(scrum,kanban,p);
-    }
-  }
-  btn.disabled=false;btn.textContent='▶ ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
-}"""
-
     new_run = """// === MAIN RUN ===
 async function runSimulation(){
   const btn=document.getElementById('btn-run');
@@ -182,9 +146,11 @@ async function runSimulation(){
   btn.disabled=false;btn.textContent='▶ ЗАПУСТИТЬ СНОВА';pw.classList.remove('visible');
 }"""
 
-    if old_run not in text:
+    import re
+    match = re.search(r'// === MAIN RUN ===.*?btn\.disabled=false;btn\.textContent=\'▶ ЗАПУСТИТЬ СНОВА\';pw\.classList\.remove\(\'visible\'\);\n}', text, flags=re.DOTALL)
+    if not match:
         raise SystemExit("Шаблон: блок runSimulation не найден.")
-    text = text.replace(old_run, new_run)
+    text = text[:match.start()] + new_run + text[match.end():]
 
     DST.write_text(text, encoding="utf-8")
     print(f"OK: {DST}")
