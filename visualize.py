@@ -14,26 +14,26 @@ from matplotlib.patches import Polygon
 from sim_html_agile import KanbanMonteCarloResult, ScrumMonteCarloResult, predictability_inverse_cov
 from stats_helpers import mean_std, percentile
 
-SC = "#00d4ff"
-KC = "#ff6b35"
+SC = "#0ea5e9"
+KC = "#f97316"
 SD = (0, 212 / 255, 1, 0.13)
 KD = (255 / 255, 107 / 255, 53 / 255, 0.13)
-BG = "#09090f"
-FG = "#e8e8f0"
-MUTED = "#6b6b8a"
+BG = "#ffffff"
+FG = "#1e293b"
+MUTED = "#64748b"
 
 
 def _setup_style() -> None:
     plt.rcParams.update(
         {
             "figure.facecolor": BG,
-            "axes.facecolor": "#16161f",
-            "axes.edgecolor": "#252535",
+            "axes.facecolor": "#f8fafc",
+            "axes.edgecolor": "#e2e8f0",
             "axes.labelcolor": FG,
             "text.color": FG,
             "xtick.color": MUTED,
             "ytick.color": MUTED,
-            "grid.color": "#252535",
+            "grid.color": "#e2e8f0",
             "grid.alpha": 0.8,
         }
     )
@@ -77,7 +77,7 @@ def plot_bar_compare_stats(
     ax.set_xticklabels(labs)
     ax.set_ylabel(y_label, color=MUTED)
     ax.set_title(title, color=FG, fontsize=11)
-    ax.legend(facecolor="#111118", edgecolor="#252535", labelcolor=FG)
+    ax.legend(facecolor="#f8fafc", edgecolor="#e2e8f0", labelcolor=FG)
     ax.grid(True, axis="y", alpha=0.4)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, facecolor=BG)
@@ -116,7 +116,7 @@ def plot_distribution_line(
     ax.set_xlabel(xlabel, color=MUTED)
     ax.set_ylabel("Частота (%)", color=MUTED)
     ax.set_title(title, color=FG, fontsize=11)
-    ax.legend(facecolor="#111118", edgecolor="#252535", labelcolor=FG)
+    ax.legend(facecolor="#f8fafc", edgecolor="#e2e8f0", labelcolor=FG)
     ax.grid(True, alpha=0.4)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, facecolor=BG)
@@ -142,7 +142,7 @@ def plot_percentile_profile(
     ax.set_xticklabels(labs)
     ax.set_ylabel("Часы (дни)", color=MUTED)
     ax.set_title("Перцентильный профиль — цикловое время", color=FG, fontsize=11)
-    ax.legend(facecolor="#111118", edgecolor="#252535", labelcolor=FG)
+    ax.legend(facecolor="#f8fafc", edgecolor="#e2e8f0", labelcolor=FG)
     ax.grid(True, alpha=0.4)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, facecolor=BG)
@@ -184,7 +184,7 @@ def plot_completion_wip_bars(
     ax.set_ylabel("%", color=MUTED)
     ax.set_ylim(0, 110)
     ax.set_title("Завершение спринта / WIP-соблюдение", color=FG, fontsize=11)
-    ax.legend(facecolor="#111118", edgecolor="#252535", labelcolor=FG, fontsize=8)
+    ax.legend(facecolor="#f8fafc", edgecolor="#e2e8f0", labelcolor=FG, fontsize=8)
     ax.grid(True, axis="y", alpha=0.4)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150, facecolor=BG)
@@ -251,7 +251,7 @@ def plot_radar(
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(labels, fontsize=8, color=MUTED)
     ax.set_title("Интегральная оценка (радар)", color=FG, fontsize=11, pad=16)
-    ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.08), facecolor="#111118", labelcolor=FG)
+    ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.08), facecolor="#f8fafc", labelcolor=FG)
     plt.subplots_adjust(top=0.88, left=0.12, right=0.88)
     plt.savefig(out_path, dpi=150, facecolor=BG)
     plt.close()

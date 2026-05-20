@@ -9,3 +9,45 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# Thesis Documents and Examples
+ВКр/
+Пример ВКР/
+*.docx
+*.pdf
+
+# Text and Data outputs/dumps
+*.txt
+!requirements.txt
+grep_out.txt
+*.log
+*.csv
+*.xlsx
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Session specific files and one-off automation scripts
+README_SESSION.md
+output/
+legacy/
+test.js
+scratch/
+extracted_*.py
+extracted_raw_*.py
+
+
+# Throwaway/helper scripts
+dump_*.py
+fix_*.py
+update_*.py
+clean_*.py
+check_*.py
+find_*.py
+print_*.py
+generate_plots.py
+load_jira_csv.py
+zip_v4.py
+replace_media.ps1
