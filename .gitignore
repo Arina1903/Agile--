@@ -34,12 +34,19 @@ extracted_images/
 *.pdf
 *.docx
 *.pptx
-*.json
+
+# Data JSON files (but NOT config files like vercel.json)
+data/*.json
 
 # ── Logs & temp text dumps ─────────────────────────────────────────────────────
 *.log
 *.txt
 !requirements.txt
+!runtime.txt
+!api/requirements.txt
 
 # ── Data files ─────────────────────────────────────────────────────────────────
 data/
+
+# ── Helper/patch scripts (not part of project) ─────────────────────────────────
+patch_mobile.py

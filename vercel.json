@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/simulate.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
+    },
+    {
+      "src": "webapp/static/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/simulate",
+      "dest": "/api/simulate.py"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/simulate.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/webapp/static/index.html"
+    }
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1"
+  }
+}
