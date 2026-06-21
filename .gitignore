@@ -1,26 +1,29 @@
+# ── Python ─────────────────────────────────────────────────────────────────────
 .venv/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 .pytest_cache/
 .mypy_cache/
+
+# ── IDE ────────────────────────────────────────────────────────────────────────
 .idea/
 .vscode/
+
+# ── Build artifacts ────────────────────────────────────────────────────────────
 *.egg-info/
 dist/
 build/
 
-# Thesis Documents and Examples
-ВКр/
-Пример ВКР/
-*.docx
-*.pdf
+# ── ВКР-материалы: документы, презентации, дампы (не часть кода) ──────────────
+_materials/
 
-# Text and Data outputs/dumps
-*.txt
-!requirements.txt
-grep_out.txt
-*.log
+# ── App runtime outputs (generated data, images, reports) ─────────────────────
+output/
+extracted_images/
+
+# ── Large / binary data files ──────────────────────────────────────────────────
 *.csv
 *.xlsx
 *.png
@@ -28,26 +31,15 @@ grep_out.txt
 *.jpeg
 *.gif
 *.svg
+*.pdf
+*.docx
+*.pptx
+*.json
 
-# Session specific files and one-off automation scripts
-README_SESSION.md
-output/
-legacy/
-test.js
-scratch/
-extracted_*.py
-extracted_raw_*.py
+# ── Logs & temp text dumps ─────────────────────────────────────────────────────
+*.log
+*.txt
+!requirements.txt
 
-
-# Throwaway/helper scripts
-dump_*.py
-fix_*.py
-update_*.py
-clean_*.py
-check_*.py
-find_*.py
-print_*.py
-generate_plots.py
-load_jira_csv.py
-zip_v4.py
-replace_media.ps1
+# ── Data files ─────────────────────────────────────────────────────────────────
+data/
